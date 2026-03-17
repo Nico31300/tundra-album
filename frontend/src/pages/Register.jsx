@@ -25,32 +25,32 @@ export default function Register() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ width: 360 }}>
-        <h1 style={{ marginBottom: 24, fontSize: 22 }}>Créer un compte</h1>
+        <h1 style={{ marginBottom: 24, fontSize: 22 }}>Create an account</h1>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <input
-            placeholder="Nom d'utilisateur"
+            placeholder="Username"
             value={form.username}
             onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
             required
           />
           <input
             type="password"
-            placeholder="Mot de passe"
+            placeholder="Password"
             value={form.password}
             onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
             required
           />
           <input
-            placeholder="Alliance (optionnel)"
+            placeholder="Alliance (optional)"
             value={form.alliance}
             onChange={e => setForm(f => ({ ...f, alliance: e.target.value }))}
           />
           {error && <p className="error">{error}</p>}
-          <button type="submit" className="btn-primary">S'inscrire</button>
+          <button type="submit" className="btn-primary">Register</button>
         </form>
         <p style={{ marginTop: 16, fontSize: 14, color: '#94a3b8', textAlign: 'center' }}>
-          Déjà un compte ?{' '}
-          <Link to="/login" style={{ color: '#3b82f6' }}>Se connecter</Link>
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: '#3b82f6' }}>Login</Link>
         </p>
       </div>
     </div>

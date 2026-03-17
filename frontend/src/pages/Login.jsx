@@ -28,24 +28,24 @@ export default function Login() {
         <h1 style={{ marginBottom: 24, fontSize: 22 }}>Tundra Albums</h1>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <input
-            placeholder="Nom d'utilisateur"
+            placeholder="Username"
             value={form.username}
             onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
             required
           />
           <input
             type="password"
-            placeholder="Mot de passe"
+            placeholder="Password"
             value={form.password}
             onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
             required
           />
           {error && <p className="error">{error}</p>}
-          <button type="submit" className="btn-primary">Connexion</button>
+          <button type="submit" className="btn-primary">Login</button>
         </form>
         <p style={{ marginTop: 16, fontSize: 14, color: '#94a3b8', textAlign: 'center' }}>
-          Pas encore de compte ?{' '}
-          <Link to="/register" style={{ color: '#3b82f6' }}>S'inscrire</Link>
+          No account yet?{' '}
+          <Link to="/register" style={{ color: '#3b82f6' }}>Register</Link>
         </p>
       </div>
     </div>

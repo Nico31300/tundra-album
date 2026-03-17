@@ -3,8 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_LABELS = {
-  need: 'Je cherche',
-  have_duplicate: 'J\'ai en double',
+  need: 'Looking for',
+  have_duplicate: 'Have duplicate',
 };
 
 const STATUS_COLORS = {
@@ -61,7 +61,7 @@ export default function Album() {
     setPieceStatus(piece.id, next);
   }
 
-  if (!album) return <div style={{ padding: 32 }}>Chargement...</div>;
+  if (!album) return <div style={{ padding: 32 }}>Loading...</div>;
 
   const myAlliance = auth.alliance;
   const allianceMembers = usersData.filter(u => u.sameAlliance);
@@ -76,16 +76,16 @@ export default function Album() {
           className={showUsers ? 'btn-primary' : 'btn-ghost'}
           onClick={() => setShowUsers(v => !v)}
         >
-          {showUsers ? 'Masquer joueurs' : 'Voir joueurs'}
+          {showUsers ? 'Hide players' : 'View players'}
         </button>
       </div>
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 20, fontSize: 13 }}>
-        <span style={{ color: '#64748b' }}>Cliquez sur une pièce pour changer son état :</span>
-        <span style={{ color: STATUS_COLORS.need }}>● Je cherche</span>
-        <span style={{ color: STATUS_COLORS.have_duplicate }}>● J'ai en double</span>
-        <span style={{ color: '#334155' }}>● Normal</span>
+        <span style={{ color: '#64748b' }}>Click a piece to change its status:</span>
+        <span style={{ color: STATUS_COLORS.need }}>● Looking for</span>
+        <span style={{ color: STATUS_COLORS.have_duplicate }}>● Have duplicate</span>
+        <span style={{ color: '#334155' }}>● None</span>
       </div>
 
       {album.puzzles.map(puzzle => (
@@ -100,7 +100,7 @@ export default function Album() {
                   key={piece.id}
                   onClick={() => cycleStatus(piece)}
                   disabled={isLoading}
-                  title={piece.status ? STATUS_LABELS[piece.status] : 'Aucun statut'}
+                  title={piece.status ? STATUS_LABELS[piece.status] : 'No status'}
                   style={{
                     background: color,
                     color: piece.status ? '#000' : '#94a3b8',
@@ -127,7 +127,7 @@ export default function Album() {
 
       {showUsers && usersData.length > 0 && (
         <div className="card" style={{ marginTop: 24 }}>
-          <h3 style={{ marginBottom: 16 }}>Joueurs</h3>
+          <h3 style={{ marginBottom: 16 }}>Players</h3>
 
           {allianceMembers.length > 0 && (
             <>
@@ -140,7 +140,7 @@ export default function Album() {
 
           {otherMembers.length > 0 && (
             <div style={{ marginTop: allianceMembers.length > 0 ? 20 : 0 }}>
-              <h4 style={{ marginBottom: 10, fontSize: 13, color: '#64748b' }}>Autres alliances</h4>
+              <h4 style={{ marginBottom: 10, fontSize: 13, color: '#64748b' }}>Other alliances</h4>
               <MemberList members={otherMembers} showAlliance />
             </div>
           )}
@@ -149,7 +149,7 @@ export default function Album() {
 
       {showUsers && usersData.length === 0 && (
         <div className="card" style={{ marginTop: 24, color: '#64748b', fontSize: 14 }}>
-          Aucun autre joueur n'a renseigné de pièces pour cet album.
+          No other player has listed pieces for this album.
         </div>
       )}
     </div>
@@ -170,8 +170,8 @@ function MemberList({ members, showAlliance = false }) {
                 <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{member.alliance}]</span>
               )}
             </div>
-            <div style={{ color: STATUS_COLORS.have_duplicate }}>Offre : {offers} pièce(s)</div>
-            <div style={{ color: STATUS_COLORS.need }}>Cherche : {needs} pièce(s)</div>
+            <div style={{ color: STATUS_COLORS.have_duplicate }}>Offering: {offers} piece(s)</div>
+            <div style={{ color: STATUS_COLORS.need }}>Looking for: {needs} piece(s)</div>
           </div>
         );
       })}

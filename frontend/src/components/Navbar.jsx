@@ -28,7 +28,7 @@ export default function Navbar() {
             {auth.alliance && <span style={{ color: '#3b82f6', marginLeft: 8 }}>[{auth.alliance}]</span>}
           </span>
           <button className="btn-ghost" onClick={handleLogout} style={{ padding: '6px 12px' }}>
-            Déconnexion
+            Logout
           </button>
         </>
       )}
