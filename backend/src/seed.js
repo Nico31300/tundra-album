@@ -250,7 +250,7 @@ const seedAll = db.transaction(() => {
       const puzzleId = puzzleResult.lastInsertRowid;
 
       for (let pc = 1; pc <= puzzle.pieces; pc++) {
-        insertPiece.run(puzzleId, `Pièce ${pc}`, pc);
+        insertPiece.run(puzzleId, `Piece ${pc}`, pc);
       }
 
       totalPuzzles++;
