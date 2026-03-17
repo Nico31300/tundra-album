@@ -5,7 +5,7 @@ const { authMiddleware } = require('../middleware/auth');
 const router = express.Router();
 
 // GET /api/albums — list all albums
-router.get('/', authMiddleware, (req, res) => {
+router.get('/', authMiddleware, (_req, res) => {
   const albums = db.prepare('SELECT * FROM albums ORDER BY position').all();
   res.json(albums);
 });
@@ -34,36 +34,39 @@ router.get('/:albumId', authMiddleware, (req, res) => {
   res.json({ ...album, puzzles: puzzlesWithPieces });
 });
 
-// GET /api/albums/:albumId/alliance — inventory of alliance members for this album
-router.get('/:albumId/alliance', authMiddleware, (req, res) => {
+// GET /api/albums/:albumId/users — inventory of all other users for this album
+router.get('/:albumId/users', authMiddleware, (req, res) => {
   const { albumId } = req.params;
   const userId = req.user.id;
 
   const currentUser = db.prepare('SELECT alliance FROM users WHERE id = ?').get(userId);
-  if (!currentUser?.alliance) {
-    return res.json([]);
-  }
 
-  const members = db.prepare(`
-    SELECT u.id, u.username,
+  const rows = db.prepare(`
+    SELECT u.id, u.username, u.alliance,
            i.piece_id, i.status
     FROM users u
     JOIN inventory i ON i.user_id = u.id
     JOIN pieces p ON p.id = i.piece_id
     JOIN puzzles pz ON pz.id = p.puzzle_id
-    WHERE u.alliance = ? AND u.id != ? AND pz.album_id = ?
-  `).all(currentUser.alliance, userId, albumId);
+    WHERE u.id != ? AND pz.album_id = ?
+  `).all(userId, albumId);
 
-  // Group by member
-  const byMember = {};
-  for (const row of members) {
-    if (!byMember[row.id]) {
-      byMember[row.id] = { id: row.id, username: row.username, inventory: {} };
+  // Group by user
+  const byUser = {};
+  for (const row of rows) {
+    if (!byUser[row.id]) {
+      byUser[row.id] = {
+        id: row.id,
+        username: row.username,
+        alliance: row.alliance,
+        sameAlliance: !!(currentUser?.alliance && row.alliance === currentUser.alliance),
+        inventory: {},
+      };
     }
-    byMember[row.id].inventory[row.piece_id] = row.status;
+    byUser[row.id].inventory[row.piece_id] = row.status;
   }
 
-  res.json(Object.values(byMember));
+  res.json(Object.values(byUser));
 });
 
 module.exports = router;
