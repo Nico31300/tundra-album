@@ -29,18 +29,24 @@ export default function Albums() {
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ marginBottom: 24 }}>
         Albums
-        {albums.length > 0 && (
-          <span style={{ fontSize: 14, fontWeight: 400, color: '#64748b', marginLeft: 12 }}>
-            {albums.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0)} pieces
-          </span>
-        )}
+        {albums.length > 0 && (() => {
+          const total = albums.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0);
+          const owned = albums.reduce((sum, a) => sum + (a.stats?.have ?? 0) + (a.stats?.have_duplicate ?? 0), 0);
+          return (
+            <span style={{ fontSize: 14, fontWeight: 400, color: '#64748b', marginLeft: 12 }}>
+              {owned}/{total} pieces
+            </span>
+          );
+        })()}
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gridAutoRows: '1fr', gap: 12 }}>
-        {albums.map(album => (
+        {albums.map(album => {
+          const allDone = album.stats?.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
+          return (
           <Link key={album.id} to={`/albums/${album.id}`} style={{ display: 'flex', height: '100%' }}>
-            <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s', display: 'flex', flexDirection: 'column', flex: 1 }}
+            <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s', display: 'flex', flexDirection: 'column', flex: 1, background: allDone ? '#0f2744' : '', borderColor: allDone ? '#1d4ed8' : '' }}
               onMouseEnter={e => e.currentTarget.style.background = '#263347'}
-              onMouseLeave={e => e.currentTarget.style.background = ''}>
+              onMouseLeave={e => e.currentTarget.style.background = allDone ? '#0f2744' : ''}>
               <div style={{ fontWeight: 600, marginBottom: 10 }}>{album.name}</div>
               {album.stats && (
                 <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
@@ -69,7 +75,7 @@ export default function Albums() {
               )}
             </div>
           </Link>
-        ))}
+        );})}
       </div>
 
       {users.length > 0 && (
