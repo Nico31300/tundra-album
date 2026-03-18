@@ -22,6 +22,7 @@ export default function Album() {
   const [pendingReset, setPendingReset] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
+  const [mode, setMode] = useState('need');
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -86,11 +87,8 @@ export default function Album() {
     setPendingReset(null);
   }
 
-  function cycleStatus(piece) {
-    // null → need → have_duplicate → null
-    const next = piece.status === null ? 'need'
-      : piece.status === 'need' ? 'have_duplicate'
-      : null;
+  function handlePieceClick(piece) {
+    const next = piece.status === mode ? null : mode;
     setPieceStatus(piece.id, next);
   }
 
@@ -134,12 +132,28 @@ export default function Album() {
         </div>
       )}
 
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 20, fontSize: 13 }}>
-        <span style={{ color: '#64748b' }}>Click a piece to change its status:</span>
-        <span style={{ color: STATUS_COLORS.need }}>● Looking for</span>
-        <span style={{ color: STATUS_COLORS.have_duplicate }}>● Have duplicate</span>
-        <span style={{ color: '#334155' }}>● None</span>
+      {/* Mode toggle */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <button
+          onClick={() => setMode('need')}
+          style={{
+            padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none',
+            background: mode === 'need' ? STATUS_COLORS.need : '#1e293b',
+            color: mode === 'need' ? '#000' : '#64748b',
+          }}
+        >
+          Looking for
+        </button>
+        <button
+          onClick={() => setMode('have_duplicate')}
+          style={{
+            padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none',
+            background: mode === 'have_duplicate' ? STATUS_COLORS.have_duplicate : '#1e293b',
+            color: mode === 'have_duplicate' ? '#000' : '#64748b',
+          }}
+        >
+          Have duplicate
+        </button>
       </div>
 
       {album.puzzles.map(puzzle => (
@@ -162,7 +176,7 @@ export default function Album() {
               return (
                 <button
                   key={piece.id}
-                  onClick={() => cycleStatus(piece)}
+                  onClick={() => handlePieceClick(piece)}
                   disabled={isLoading}
                   title={piece.status ? STATUS_LABELS[piece.status] : 'No status'}
                   style={{

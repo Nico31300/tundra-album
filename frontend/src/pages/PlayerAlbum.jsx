@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { formatRelative } from '../utils/formatRelative';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
@@ -74,6 +75,11 @@ export default function PlayerAlbum() {
               );
             })}
           </div>
+          {puzzle.last_updated && (
+            <div style={{ textAlign: 'right', marginTop: 10, fontSize: 12, color: '#64748b' }}>
+              Last updated: {formatRelative(puzzle.last_updated)}
+            </div>
+          )}
         </div>
       ))}
     </div>

@@ -78,7 +78,13 @@ router.get('/:userId/albums/:albumId', authMiddleware, (req, res) => {
       WHERE p.puzzle_id = ?
       ORDER BY p.position
     `).all(userId, currentUserId, puzzle.id);
-    return { ...puzzle, pieces };
+    const lastUpdated = db.prepare(`
+      SELECT MAX(i.updated_at) AS last_updated
+      FROM pieces p
+      JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
+      WHERE p.puzzle_id = ?
+    `).get(userId, puzzle.id);
+    return { ...puzzle, pieces, last_updated: lastUpdated?.last_updated ?? null };
   });
 
   res.json({ user, album: { ...album, puzzles: puzzlesWithPieces } });

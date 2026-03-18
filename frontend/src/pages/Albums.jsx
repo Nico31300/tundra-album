@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-function formatRelative(dateStr) {
-  const diff = Math.floor((Date.now() - new Date(dateStr + 'Z')) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`;
-  return new Date(dateStr + 'Z').toLocaleDateString();
-}
+import { formatRelative } from '../utils/formatRelative';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
