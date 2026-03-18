@@ -1,0 +1,89 @@
+# Tundra Album
+
+A collaborative puzzle piece tracker for the game Tundra. Players can mark pieces they are looking for or have as duplicates, and see what other players are offering or need.
+
+## Features
+
+- **Album & puzzle browser** — navigate albums, puzzles, and individual pieces
+- **Inventory tracking** — mark each piece as *Looking for* or *Have duplicate*
+- **Player matching** — see which players can give you pieces you need, and which pieces they need from you
+- **Player profiles** — browse any player's albums and see their inventory read-only, with your own duplicates highlighted
+- **Alliance system** — players belong to alliances; other alliances are hidden by default
+
+## Tech Stack
+
+- **Backend:** Node.js, Express, SQLite (better-sqlite3), JWT auth
+- **Frontend:** React 18, React Router v6, Vite
+- **Deployment:** Railway (with persistent volume for the database)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+
+### Installation
+
+```bash
+# Install backend dependencies
+cd backend && npm install
+
+# Install frontend dependencies
+cd ../frontend && npm install
+```
+
+### Development
+
+```bash
+# Start backend (port 3001)
+cd backend && npm run dev
+
+# Start frontend (port 5173)
+cd frontend && npm run dev
+```
+
+The frontend proxies API requests to `http://localhost:3001` via Vite config.
+
+### Seed the database
+
+```bash
+cd backend && npm run seed
+```
+
+### Run migrations
+
+```bash
+cd backend
+node src/migrate-piece-names.js
+node src/migrate-piece-names-2.js
+node src/migrate-epic-new-world.js
+node src/migrate-call-of-the-stars.js
+node src/migrate-inventory-updated-at.js
+```
+
+## Deployment (Railway)
+
+The app is deployed on Railway with:
+- A single service running the Express backend, which also serves the built frontend
+- A persistent volume mounted for the SQLite database
+
+### Build
+
+```bash
+cd frontend && npm run build
+```
+
+### Run migrations on Railway
+
+```bash
+railway run node backend/src/migrate-<name>.js
+```
+
+### Environment variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `PORT` | Server port | `3001` |
+| `DATABASE_PATH` | Path to SQLite database file | `./data/tundra.db` |
+| `JWT_SECRET` | Secret key for JWT tokens | — |
+| `NODE_ENV` | Set to `production` to serve frontend | — |
