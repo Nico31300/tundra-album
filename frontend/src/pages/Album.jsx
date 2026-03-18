@@ -22,6 +22,7 @@ export default function Album() {
   const [pendingReset, setPendingReset] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showResetDuplicateConfirm, setShowResetDuplicateConfirm] = useState(false);
+  const [showResetMenu, setShowResetMenu] = useState(false);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
   const [mode, setMode] = useState('need');
 
@@ -124,12 +125,49 @@ export default function Album() {
         >
           {showUsers ? 'Hide players' : 'View players'}
         </button>
-        <button className="btn-ghost" onClick={() => setShowResetDuplicateConfirm(true)}>
-          Reset album duplicate
-        </button>
-        <button className="btn-ghost" onClick={() => setShowResetConfirm(true)}>
-          Reset album
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button className="btn-ghost" onClick={() => setShowResetMenu(v => !v)}>
+            Reset ▾
+          </button>
+          {showResetMenu && (
+            <>
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 99 }}
+                onClick={() => setShowResetMenu(false)}
+              />
+              <div style={{
+                position: 'absolute', right: 0, top: '100%', marginTop: 4,
+                background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
+                minWidth: 200, zIndex: 100, overflow: 'hidden',
+              }}>
+                <button
+                  onClick={() => { setShowResetMenu(false); setShowResetDuplicateConfirm(true); }}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '10px 14px', background: 'none', border: 'none',
+                    color: '#e2e8f0', fontSize: 14, cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  Reset album duplicate
+                </button>
+                <button
+                  onClick={() => { setShowResetMenu(false); setShowResetConfirm(true); }}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '10px 14px', background: 'none', border: 'none',
+                    color: '#e2e8f0', fontSize: 14, cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  Reset album
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {showResetDuplicateConfirm && (
