@@ -134,14 +134,14 @@ export default function Album() {
               <h4 style={{ marginBottom: 10, fontSize: 13, color: '#3b82f6' }}>
                 My alliance {myAlliance ? `[${myAlliance}]` : ''}
               </h4>
-              <MemberList members={allianceMembers} />
+              <MemberList members={allianceMembers} album={album} />
             </>
           )}
 
           {otherMembers.length > 0 && (
             <div style={{ marginTop: allianceMembers.length > 0 ? 20 : 0 }}>
               <h4 style={{ marginBottom: 10, fontSize: 13, color: '#64748b' }}>Other alliances</h4>
-              <MemberList members={otherMembers} showAlliance />
+              <MemberList members={otherMembers} showAlliance album={album} />
             </div>
           )}
         </div>
@@ -156,22 +156,72 @@ export default function Album() {
   );
 }
 
-function MemberList({ members, showAlliance = false }) {
+function MemberList({ members, showAlliance = false, album }) {
+  // Build a map of piece_id -> piece name from the current user's album
+  const pieceMap = {};
+  for (const puzzle of album.puzzles) {
+    for (const piece of puzzle.pieces) {
+      pieceMap[piece.id] = { ...piece, puzzleName: puzzle.name };
+    }
+  }
+
+  // Current user's needs and offers
+  const myNeeds = new Set(
+    Object.entries(pieceMap)
+      .filter(([id]) => pieceMap[id].status === 'need')
+      .map(([id]) => Number(id))
+  );
+  const myOffers = new Set(
+    Object.entries(pieceMap)
+      .filter(([id]) => pieceMap[id].status === 'have_duplicate')
+      .map(([id]) => Number(id))
+  );
+
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 13 }}>
       {members.map(member => {
-        const needs = Object.values(member.inventory).filter(s => s === 'need').length;
-        const offers = Object.values(member.inventory).filter(s => s === 'have_duplicate').length;
+        // Pieces this member can give me (they have duplicate, I need)
+        const canGiveMe = Object.entries(member.inventory)
+          .filter(([id, s]) => s === 'have_duplicate' && myNeeds.has(Number(id)))
+          .map(([id]) => { const p = pieceMap[id]; return p ? `${p.puzzleName} - ${p.name}` : null; })
+          .filter(Boolean);
+
+        // Pieces I can give them (I have duplicate, they need)
+        const iCanGive = Object.entries(member.inventory)
+          .filter(([id, s]) => s === 'need' && myOffers.has(Number(id)))
+          .map(([id]) => { const p = pieceMap[id]; return p ? `${p.puzzleName} - ${p.name}` : null; })
+          .filter(Boolean);
+
+        const hasMatch = canGiveMe.length > 0 || iCanGive.length > 0;
+
         return (
-          <div key={member.id} style={{ background: '#0f172a', borderRadius: 8, padding: '10px 14px' }}>
-            <div style={{ fontWeight: 600, marginBottom: 2 }}>
+          <div key={member.id} style={{
+            background: '#0f172a',
+            borderRadius: 8,
+            padding: '10px 14px',
+            border: hasMatch ? '1px solid #334155' : '1px solid transparent',
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>
               {member.username}
               {showAlliance && member.alliance && (
                 <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{member.alliance}]</span>
               )}
             </div>
-            <div style={{ color: STATUS_COLORS.have_duplicate }}>Offering: {offers} piece(s)</div>
-            <div style={{ color: STATUS_COLORS.need }}>Looking for: {needs} piece(s)</div>
+            {canGiveMe.length > 0 && (
+              <div style={{ marginBottom: 4 }}>
+                <span style={{ color: STATUS_COLORS.have_duplicate }}>Can give you:</span>
+                <div style={{ paddingLeft: 8, color: '#cbd5e1' }}>{canGiveMe.join(', ')}</div>
+              </div>
+            )}
+            {iCanGive.length > 0 && (
+              <div>
+                <span style={{ color: STATUS_COLORS.need }}>Needs from you:</span>
+                <div style={{ paddingLeft: 8, color: '#cbd5e1' }}>{iCanGive.join(', ')}</div>
+              </div>
+            )}
+            {!hasMatch && (
+              <div style={{ color: '#475569' }}>No match</div>
+            )}
           </div>
         );
       })}
