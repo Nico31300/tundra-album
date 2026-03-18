@@ -18,9 +18,9 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
       db.prepare('DELETE FROM inventory WHERE user_id = ? AND piece_id = ?').run(userId, pieceId);
     } else if (status === 'need' || status === 'have_duplicate') {
       db.prepare(`
-        INSERT INTO inventory (user_id, piece_id, status)
-        VALUES (?, ?, ?)
-        ON CONFLICT(user_id, piece_id) DO UPDATE SET status = excluded.status
+        INSERT INTO inventory (user_id, piece_id, status, updated_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, piece_id) DO UPDATE SET status = excluded.status, updated_at = CURRENT_TIMESTAMP
       `).run(userId, pieceId, status);
     } else {
       return res.status(400).json({ error: 'Status invalide' });
