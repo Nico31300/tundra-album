@@ -33,4 +33,25 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
   }
 });
 
+// DELETE /api/inventory/puzzle/:puzzleId — reset all pieces of a puzzle for current user
+router.delete('/puzzle/:puzzleId', authMiddleware, (req, res) => {
+  const { puzzleId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const puzzle = db.prepare('SELECT id FROM puzzles WHERE id = ?').get(puzzleId);
+    if (!puzzle) return res.status(404).json({ error: 'Puzzle introuvable' });
+
+    db.prepare(`
+      DELETE FROM inventory
+      WHERE user_id = ? AND piece_id IN (SELECT id FROM pieces WHERE puzzle_id = ?)
+    `).run(userId, puzzleId);
+
+    res.json({ puzzleId: Number(puzzleId) });
+  } catch (e) {
+    console.error('Inventory reset error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

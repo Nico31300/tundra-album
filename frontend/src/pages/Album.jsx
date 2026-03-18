@@ -19,6 +19,7 @@ export default function Album() {
   const [usersData, setUsersData] = useState([]);
   const [showUsers, setShowUsers] = useState(false);
   const [pendingPiece, setPendingPiece] = useState(null);
+  const [pendingReset, setPendingReset] = useState(null);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -51,6 +52,22 @@ export default function Album() {
       }));
     }
     setPendingPiece(null);
+  }
+
+  async function resetPuzzle(puzzleId) {
+    setPendingReset(puzzleId);
+    const res = await fetch(`/api/inventory/puzzle/${puzzleId}`, { method: 'DELETE', headers });
+    if (res.ok) {
+      setAlbum(prev => ({
+        ...prev,
+        puzzles: prev.puzzles.map(pz =>
+          pz.id === puzzleId
+            ? { ...pz, pieces: pz.pieces.map(p => ({ ...p, status: null })) }
+            : pz
+        ),
+      }));
+    }
+    setPendingReset(null);
   }
 
   function cycleStatus(piece) {
@@ -90,7 +107,17 @@ export default function Album() {
 
       {album.puzzles.map(puzzle => (
         <div key={puzzle.id} className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginBottom: 14, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
+            <h3 style={{ flex: 1, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
+            <button
+              className="btn-ghost"
+              onClick={() => resetPuzzle(puzzle.id)}
+              disabled={pendingReset === puzzle.id}
+              style={{ fontSize: 12, opacity: pendingReset === puzzle.id ? 0.5 : 1 }}
+            >
+              Reset
+            </button>
+          </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {puzzle.pieces.map(piece => {
               const color = piece.status ? STATUS_COLORS[piece.status] : '#334155';
