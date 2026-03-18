@@ -20,6 +20,8 @@ export default function Album() {
   const [showUsers, setShowUsers] = useState(false);
   const [pendingPiece, setPendingPiece] = useState(null);
   const [pendingReset, setPendingReset] = useState(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showOtherAlliances, setShowOtherAlliances] = useState(false);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -52,6 +54,20 @@ export default function Album() {
       }));
     }
     setPendingPiece(null);
+  }
+
+  async function resetAlbum() {
+    setShowResetConfirm(false);
+    const res = await fetch(`/api/inventory/album/${albumId}`, { method: 'DELETE', headers });
+    if (res.ok) {
+      setAlbum(prev => ({
+        ...prev,
+        puzzles: prev.puzzles.map(pz => ({
+          ...pz,
+          pieces: pz.pieces.map(p => ({ ...p, status: null })),
+        })),
+      }));
+    }
   }
 
   async function resetPuzzle(puzzleId) {
@@ -95,7 +111,28 @@ export default function Album() {
         >
           {showUsers ? 'Hide players' : 'View players'}
         </button>
+        <button className="btn-ghost" onClick={() => setShowResetConfirm(true)}>
+          Reset album
+        </button>
       </div>
+
+      {showResetConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
+        }}>
+          <div className="card" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Reset album</div>
+            <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 20 }}>
+              This will clear all your piece statuses for <strong>{album.name}</strong>. Continue?
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="btn-ghost" onClick={() => setShowResetConfirm(false)}>Cancel</button>
+              <button className="btn-primary" onClick={resetAlbum}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 20, fontSize: 13 }}>
@@ -167,8 +204,17 @@ export default function Album() {
 
           {otherMembers.length > 0 && (
             <div style={{ marginTop: allianceMembers.length > 0 ? 20 : 0 }}>
-              <h4 style={{ marginBottom: 10, fontSize: 13, color: '#64748b' }}>Other alliances</h4>
-              <MemberList members={otherMembers} showAlliance album={album} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <h4 style={{ fontSize: 13, color: '#64748b' }}>Other alliances</h4>
+                <button
+                  className="btn-ghost"
+                  style={{ fontSize: 12 }}
+                  onClick={() => setShowOtherAlliances(v => !v)}
+                >
+                  {showOtherAlliances ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              {showOtherAlliances && <MemberList members={otherMembers} showAlliance album={album} />}
             </div>
           )}
         </div>
