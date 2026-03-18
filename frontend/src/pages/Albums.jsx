@@ -102,7 +102,10 @@ function UserList({ users, showAlliance = false }) {
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 13 }}>
       {users.map(user => (
-        <div key={user.id} style={{ background: '#0f172a', borderRadius: 8, padding: '10px 14px' }}>
+        <Link key={user.id} to={`/players/${user.id}`}>
+        <div style={{ background: '#0f172a', borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}
+          onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+          onMouseLeave={e => e.currentTarget.style.background = '#0f172a'}>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>
             {user.username}
             {showAlliance && user.alliance && (
@@ -124,6 +127,7 @@ function UserList({ users, showAlliance = false }) {
             </div>
           )}
         </div>
+        </Link>
       ))}
     </div>
   );
