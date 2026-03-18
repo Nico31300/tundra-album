@@ -8,6 +8,7 @@ import Albums from './pages/Albums';
 import Album from './pages/Album';
 import PlayerAlbums from './pages/PlayerAlbums';
 import PlayerAlbum from './pages/PlayerAlbum';
+import Settings from './pages/Settings';
 
 function PrivateRoute({ children }) {
   const { auth } = useAuth();
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="/albums/:albumId" element={<PrivateRoute><Album /></PrivateRoute>} />
         <Route path="/players/:userId" element={<PrivateRoute><PlayerAlbums /></PrivateRoute>} />
         <Route path="/players/:userId/albums/:albumId" element={<PrivateRoute><PlayerAlbum /></PrivateRoute>} />
+        <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />

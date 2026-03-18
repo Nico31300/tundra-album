@@ -17,13 +17,20 @@ export function AuthProvider({ children }) {
     setAuth(data);
   }
 
+  function updateAuth(data) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('username', data.username);
+    localStorage.setItem('alliance', data.alliance || '');
+    setAuth(data);
+  }
+
   function logout() {
     localStorage.clear();
     setAuth(null);
   }
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout }}>
+    <AuthContext.Provider value={{ auth, login, updateAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

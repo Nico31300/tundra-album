@@ -36,4 +36,27 @@ router.post('/login', (req, res) => {
   res.json({ token, username: user.username, alliance: user.alliance });
 });
 
+router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res) => {
+  const { username, alliance } = req.body;
+  const userId = req.user.id;
+
+  if (!username || !username.trim()) {
+    return res.status(400).json({ error: 'Username requis' });
+  }
+
+  try {
+    db.prepare('UPDATE users SET username = ?, alliance = ? WHERE id = ?')
+      .run(username.trim(), alliance?.trim() || null, userId);
+
+    const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    const token = jwt.sign({ id: updated.id, username: updated.username }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, username: updated.username, alliance: updated.alliance });
+  } catch (e) {
+    if (e.message.includes('UNIQUE')) {
+      return res.status(409).json({ error: 'Nom d\'utilisateur déjà pris' });
+    }
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;
