@@ -4,10 +4,25 @@ const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /api/albums — list all albums
-router.get('/', authMiddleware, (_req, res) => {
+// GET /api/albums — list all albums with user inventory summary
+router.get('/', authMiddleware, (req, res) => {
+  const userId = req.user.id;
   const albums = db.prepare('SELECT * FROM albums ORDER BY position').all();
-  res.json(albums);
+
+  const stats = db.prepare(`
+    SELECT pz.album_id,
+           COUNT(p.id) AS total,
+           SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
+           SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate
+    FROM puzzles pz
+    JOIN pieces p ON p.puzzle_id = pz.id
+    LEFT JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
+    GROUP BY pz.album_id
+  `).all(userId);
+
+  const statsByAlbum = Object.fromEntries(stats.map(s => [s.album_id, s]));
+
+  res.json(albums.map(album => ({ ...album, stats: statsByAlbum[album.id] ?? { total: 0, need: 0, have_duplicate: 0 } })));
 });
 
 // GET /api/albums/:albumId — puzzles + pieces for an album, with user inventory
