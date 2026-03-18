@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { formatRelative } from '../utils/formatRelative';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
@@ -34,11 +35,11 @@ export default function PlayerAlbums() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
         {albums.map(album => (
           <Link key={album.id} to={`/players/${userId}/albums/${album.id}`}>
-            <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s' }}
+            <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s', display: 'flex', flexDirection: 'column' }}
               onMouseEnter={e => e.currentTarget.style.background = '#263347'}
               onMouseLeave={e => e.currentTarget.style.background = ''}>
               <div style={{ fontWeight: 600, marginBottom: 10 }}>{album.name}</div>
-              <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
                 <div style={{ color: '#64748b' }}>{album.stats.total} pieces</div>
                 {album.stats.need > 0 && (
                   <div style={{ color: STATUS_COLORS.need }}>Looking for: {album.stats.need}</div>
@@ -47,6 +48,11 @@ export default function PlayerAlbums() {
                   <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicate: {album.stats.have_duplicate}</div>
                 )}
               </div>
+              {album.stats.last_updated && (
+                <div style={{ fontSize: 11, color: '#475569', textAlign: 'right', marginTop: 10 }}>
+                  {formatRelative(album.stats.last_updated)}
+                </div>
+              )}
             </div>
           </Link>
         ))}

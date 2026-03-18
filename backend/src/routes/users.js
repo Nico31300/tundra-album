@@ -39,7 +39,8 @@ router.get('/:userId/albums', authMiddleware, (req, res) => {
     SELECT pz.album_id,
            COUNT(p.id) AS total,
            SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
-           SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate
+           SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate,
+           MAX(i.updated_at) AS last_updated
     FROM puzzles pz
     JOIN pieces p ON p.puzzle_id = pz.id
     LEFT JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
