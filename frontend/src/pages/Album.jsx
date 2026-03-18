@@ -5,11 +5,13 @@ import { useAuth } from '../context/AuthContext';
 const STATUS_LABELS = {
   need: 'Looking for',
   have_duplicate: 'Have duplicate',
+  have: 'Have',
 };
 
 const STATUS_COLORS = {
   need: '#f59e0b',
   have_duplicate: '#22c55e',
+  have: '#3b82f6',
 };
 
 export default function Album() {
@@ -113,6 +115,7 @@ export default function Album() {
   const myAlliance = auth.alliance;
   const allianceMembers = usersData.filter(u => u.sameAlliance);
   const otherMembers = usersData.filter(u => !u.sameAlliance);
+
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
@@ -228,10 +231,22 @@ export default function Album() {
         >
           Have duplicate
         </button>
+        <button
+          onClick={() => setMode('have')}
+          style={{
+            padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none',
+            background: mode === 'have' ? STATUS_COLORS.have : '#1e293b',
+            color: mode === 'have' ? '#fff' : '#64748b',
+          }}
+        >
+          Have
+        </button>
       </div>
 
-      {album.puzzles.map(puzzle => (
-        <div key={puzzle.id} className="card" style={{ marginBottom: 16 }}>
+      {album.puzzles.map(puzzle => {
+        const isCompleted = puzzle.pieces.length > 0 && puzzle.pieces.every(p => p.status === 'have' || p.status === 'have_duplicate');
+        return (
+        <div key={puzzle.id} className="card" style={{ marginBottom: 16, background: isCompleted ? '#0f2744' : '', borderColor: isCompleted ? '#1d4ed8' : '' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <h3 style={{ flex: 1, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
             <button
@@ -274,8 +289,13 @@ export default function Album() {
               );
             })}
           </div>
+          {isCompleted && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+              <span style={{ fontSize: 16, color: '#3b82f6', fontWeight: 700, cursor: 'default', userSelect: 'none' }}>✓</span>
+            </div>
+          )}
         </div>
-      ))}
+      ); })}
 
       {showUsers && usersData.length > 0 && (
         <div className="card" style={{ marginTop: 24 }}>

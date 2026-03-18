@@ -44,7 +44,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS inventory (
     user_id INTEGER NOT NULL REFERENCES users(id),
     piece_id INTEGER NOT NULL REFERENCES pieces(id),
-    status TEXT NOT NULL CHECK(status IN ('need', 'have_duplicate')),
+    status TEXT NOT NULL CHECK(status IN ('need', 'have_duplicate', 'have')),
     PRIMARY KEY (user_id, piece_id)
   );
 `);

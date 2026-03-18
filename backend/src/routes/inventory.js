@@ -16,7 +16,7 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
 
     if (status === null || status === undefined) {
       db.prepare('DELETE FROM inventory WHERE user_id = ? AND piece_id = ?').run(userId, pieceId);
-    } else if (status === 'need' || status === 'have_duplicate') {
+    } else if (status === 'need' || status === 'have_duplicate' || status === 'have') {
       db.prepare(`
         INSERT INTO inventory (user_id, piece_id, status, updated_at)
         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
