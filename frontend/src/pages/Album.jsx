@@ -21,6 +21,7 @@ export default function Album() {
   const [pendingPiece, setPendingPiece] = useState(null);
   const [pendingReset, setPendingReset] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showResetDuplicateConfirm, setShowResetDuplicateConfirm] = useState(false);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
   const [mode, setMode] = useState('need');
 
@@ -71,6 +72,20 @@ export default function Album() {
     }
   }
 
+  async function resetAlbumDuplicates() {
+    setShowResetDuplicateConfirm(false);
+    const res = await fetch(`/api/inventory/album/${albumId}/duplicates`, { method: 'DELETE', headers });
+    if (res.ok) {
+      setAlbum(prev => ({
+        ...prev,
+        puzzles: prev.puzzles.map(pz => ({
+          ...pz,
+          pieces: pz.pieces.map(p => p.status === 'have_duplicate' ? { ...p, status: null } : p),
+        })),
+      }));
+    }
+  }
+
   async function resetPuzzle(puzzleId) {
     setPendingReset(puzzleId);
     const res = await fetch(`/api/inventory/puzzle/${puzzleId}`, { method: 'DELETE', headers });
@@ -109,10 +124,31 @@ export default function Album() {
         >
           {showUsers ? 'Hide players' : 'View players'}
         </button>
+        <button className="btn-ghost" onClick={() => setShowResetDuplicateConfirm(true)}>
+          Reset album duplicate
+        </button>
         <button className="btn-ghost" onClick={() => setShowResetConfirm(true)}>
           Reset album
         </button>
       </div>
+
+      {showResetDuplicateConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
+        }}>
+          <div className="card" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Reset album duplicate</div>
+            <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 20 }}>
+              This will clear all your <strong>have duplicate</strong> statuses for <strong>{album.name}</strong>. Continue?
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="btn-ghost" onClick={() => setShowResetDuplicateConfirm(false)}>Cancel</button>
+              <button className="btn-primary" onClick={resetAlbumDuplicates}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showResetConfirm && (
         <div style={{
