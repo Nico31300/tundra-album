@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Albums from './pages/Albums';
@@ -40,6 +41,7 @@ function AppRoutes() {
         <Route path="/players/:userId/albums/:albumId" element={<PrivateRoute><PlayerAlbum /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </>
   );
 }
