@@ -32,10 +32,10 @@ export default function PlayerAlbums() {
           {user.alliance && <span style={{ color: '#64748b', fontWeight: 400, fontSize: 16, marginLeft: 8 }}>[{user.alliance}]</span>}
         </h2>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gridAutoRows: '1fr', gap: 12 }}>
         {albums.map(album => (
-          <Link key={album.id} to={`/players/${userId}/albums/${album.id}`}>
-            <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s', display: 'flex', flexDirection: 'column' }}
+          <Link key={album.id} to={`/players/${userId}/albums/${album.id}`} style={{ display: 'flex', height: '100%' }}>
+            <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s', display: 'flex', flexDirection: 'column', flex: 1 }}
               onMouseEnter={e => e.currentTarget.style.background = '#263347'}
               onMouseLeave={e => e.currentTarget.style.background = ''}>
               <div style={{ fontWeight: 600, marginBottom: 10 }}>{album.name}</div>
@@ -48,8 +48,22 @@ export default function PlayerAlbums() {
                   <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicate: {album.stats.have_duplicate}</div>
                 )}
               </div>
+              {album.stats.total_puzzles > 0 && (
+                <div style={{ marginTop: 8, position: 'relative', background: '#0f172a', borderRadius: 99, height: 18, overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${(album.stats.completed_puzzles / album.stats.total_puzzles) * 100}%`,
+                    height: '100%', background: '#22c55e', borderRadius: 99,
+                  }} />
+                  <span style={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, color: '#fff',
+                  }}>
+                    {album.stats.completed_puzzles}/{album.stats.total_puzzles}
+                  </span>
+                </div>
+              )}
               {album.stats.last_updated && (
-                <div style={{ fontSize: 11, color: '#475569', textAlign: 'right', marginTop: 10 }}>
+                <div style={{ fontSize: 11, color: '#475569', textAlign: 'right', marginTop: 6 }}>
                   {formatRelative(album.stats.last_updated)}
                 </div>
               )}

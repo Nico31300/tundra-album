@@ -37,6 +37,7 @@ router.get('/:userId/albums', authMiddleware, (req, res) => {
 
   const stats = db.prepare(`
     SELECT pz.album_id,
+           COUNT(DISTINCT pz.id) AS total_puzzles,
            COUNT(p.id) AS total,
            SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
            SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate,
@@ -47,11 +48,24 @@ router.get('/:userId/albums', authMiddleware, (req, res) => {
     GROUP BY pz.album_id
   `).all(userId);
 
-  const statsByAlbum = Object.fromEntries(stats.map(s => [s.album_id, s]));
+  const completed = db.prepare(`
+    SELECT album_id, COUNT(*) AS completed_puzzles
+    FROM (
+      SELECT pz.id, pz.album_id
+      FROM puzzles pz
+      JOIN pieces p ON p.puzzle_id = pz.id
+      LEFT JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
+      GROUP BY pz.id, pz.album_id
+      HAVING COUNT(p.id) > 0 AND COUNT(p.id) = SUM(CASE WHEN i.status IN ('have', 'have_duplicate') THEN 1 ELSE 0 END)
+    ) GROUP BY album_id
+  `).all(userId);
+
+  const completedByAlbum = Object.fromEntries(completed.map(c => [c.album_id, c.completed_puzzles]));
+  const statsByAlbum = Object.fromEntries(stats.map(s => [s.album_id, { ...s, completed_puzzles: completedByAlbum[s.album_id] ?? 0 }]));
 
   res.json({
     user,
-    albums: albums.map(album => ({ ...album, stats: statsByAlbum[album.id] ?? { total: 0, need: 0, have_duplicate: 0 } })),
+    albums: albums.map(album => ({ ...album, stats: statsByAlbum[album.id] ?? { total: 0, total_puzzles: 0, need: 0, have_duplicate: 0, completed_puzzles: 0 } })),
   });
 });
 
