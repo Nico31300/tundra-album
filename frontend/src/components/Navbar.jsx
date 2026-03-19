@@ -1,17 +1,57 @@
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function Navbar() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [open, setOpen] = useState(false);
+  const searchRef = useRef(null);
 
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) { setResults([]); setOpen(false); return; }
+
+    const timeout = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      })
+        .then(r => r.json())
+        .then(data => { setResults(data); setOpen(data.length > 0); });
+    }, 250);
+
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleSelect(albumId, puzzleId) {
+    setQuery('');
+    setResults([]);
+    setOpen(false);
+    navigate(`/albums/${albumId}?puzzleId=${puzzleId}`);
+  }
+
   return (
     <nav style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
       background: '#1e293b',
       borderBottom: '1px solid #334155',
       padding: '12px 24px',
@@ -20,6 +60,38 @@ export default function Navbar() {
       gap: 16,
     }}>
       <span style={{ fontWeight: 700, fontSize: 16 }}>Tundra Albums</span>
+
+      {auth && (
+        <div ref={searchRef} style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search a puzzle..."
+            style={{ width: '100%', padding: '6px 12px', fontSize: 13 }}
+          />
+          {open && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4,
+              background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
+              zIndex: 200, overflow: 'hidden',
+            }}>
+              {results.map(r => (
+                <div
+                  key={r.id}
+                  onClick={() => handleSelect(r.album_id, r.id)}
+                  style={{ padding: '8px 14px', cursor: 'pointer', fontSize: 13 }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                  onMouseLeave={e => e.currentTarget.style.background = ''}
+                >
+                  <span style={{ fontWeight: 600 }}>{r.name}</span>
+                  <span style={{ color: '#64748b', marginLeft: 8 }}>{r.album_name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <span style={{ flex: 1 }} />
       {auth && (
         <>

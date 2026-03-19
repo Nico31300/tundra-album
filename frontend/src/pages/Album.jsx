@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_LABELS = {
@@ -16,9 +16,12 @@ const STATUS_COLORS = {
 
 export default function Album() {
   const { albumId } = useParams();
+  const [searchParams] = useSearchParams();
+  const highlightedPuzzleId = Number(searchParams.get('puzzleId'));
   const { auth } = useAuth();
   const [album, setAlbum] = useState(null);
   const [albums, setAlbums] = useState([]);
+  const puzzleRefs = useRef({});
   const [usersData, setUsersData] = useState([]);
   const [showUsers, setShowUsers] = useState(false);
   const [pendingPiece, setPendingPiece] = useState(null);
@@ -41,6 +44,12 @@ export default function Album() {
     if (!showUsers) return;
     fetch(`/api/albums/${albumId}/users`, { headers }).then(r => r.json()).then(setUsersData);
   }, [albumId, showUsers]);
+
+  useEffect(() => {
+    if (!highlightedPuzzleId || !album) return;
+    const el = puzzleRefs.current[highlightedPuzzleId];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlightedPuzzleId, album]);
 
   async function setPieceStatus(pieceId, status) {
     setPendingPiece(pieceId);
@@ -150,8 +159,8 @@ export default function Album() {
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
       <div style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: '#0f172a', paddingBottom: 10, marginBottom: 4,
+        position: 'sticky', top: 54, zIndex: 50,
+        background: '#0f172a', paddingTop: 24, marginTop: -24, paddingBottom: 10, marginBottom: 4,
       }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <Link to="/albums" style={{ color: '#64748b', fontSize: 14 }}>← Albums</Link>
@@ -286,8 +295,9 @@ export default function Album() {
 
       {album.puzzles.map(puzzle => {
         const isCompleted = puzzle.pieces.length > 0 && puzzle.pieces.every(p => p.status === 'have' || p.status === 'have_duplicate');
+        const isHighlighted = puzzle.id === highlightedPuzzleId;
         return (
-        <div key={puzzle.id} className="card" style={{ marginBottom: 16, background: isCompleted ? '#0f2744' : '', borderColor: isCompleted ? '#1d4ed8' : '' }}>
+        <div key={puzzle.id} ref={el => puzzleRefs.current[puzzle.id] = el} className="card" style={{ marginBottom: 16, background: isCompleted ? '#0f2744' : '', borderColor: isHighlighted ? '#3b82f6' : isCompleted ? '#1d4ed8' : '' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <h3 style={{ flex: 1, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
             <div style={{ position: 'relative' }}>

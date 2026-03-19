@@ -26,7 +26,7 @@ export default function PlayerAlbums() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <Link to="/" style={{ color: '#64748b', fontSize: 14 }}>← Players</Link>
+        <Link to="/players" style={{ color: '#64748b', fontSize: 14 }}>← Players</Link>
         <h2 style={{ flex: 1 }}>
           {user.username}
           {user.alliance && <span style={{ color: '#64748b', fontWeight: 400, fontSize: 16, marginLeft: 8 }}>[{user.alliance}]</span>}
