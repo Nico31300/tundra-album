@@ -23,16 +23,13 @@ export default function Album() {
   const [album, setAlbum] = useState(null);
   const [albums, setAlbums] = useState([]);
   const puzzleRefs = useRef({});
-  const [usersData, setUsersData] = useState([]);
-  const [showUsers, setShowUsers] = useState(false);
   const [pendingPiece, setPendingPiece] = useState(null);
   const [pendingReset, setPendingReset] = useState(null);
   const [openActionMenu, setOpenActionMenu] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showResetDuplicateConfirm, setShowResetDuplicateConfirm] = useState(false);
   const [showResetMenu, setShowResetMenu] = useState(false);
-  const [showOtherAlliances, setShowOtherAlliances] = useState(false);
-  const [mode, setMode] = useState('need');
+const [mode, setMode] = useState('need');
   const [starsMenu, setStarsMenu] = useState(null); // { pieceId, x, y, currentStars }
 
   const headers = { Authorization: `Bearer ${auth.token}` };
@@ -42,12 +39,7 @@ export default function Album() {
     fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
   }, [albumId]);
 
-  useEffect(() => {
-    if (!showUsers) return;
-    fetch(`/api/albums/${albumId}/users`, { headers }).then(r => r.json()).then(setUsersData);
-  }, [albumId, showUsers]);
-
-  useEffect(() => {
+useEffect(() => {
     if (!highlightedPuzzleId || !album) return;
     const el = puzzleRefs.current[highlightedPuzzleId];
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -173,11 +165,7 @@ export default function Album() {
 
   if (!album) return <div style={{ padding: 32 }}>Loading...</div>;
 
-  const myAlliance = auth.alliance;
-  const allianceMembers = usersData.filter(u => u.sameAlliance);
-  const otherMembers = usersData.filter(u => !u.sameAlliance);
-
-  const currentIndex = albums.findIndex(a => a.id === album.id);
+const currentIndex = albums.findIndex(a => a.id === album.id);
   const prevAlbum = currentIndex > 0 ? albums[currentIndex - 1] : null;
   const nextAlbum = currentIndex >= 0 && currentIndex < albums.length - 1 ? albums[currentIndex + 1] : null;
 
@@ -257,19 +245,6 @@ export default function Album() {
                 background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
                 minWidth: 200, zIndex: 100, overflow: 'hidden',
               }}>
-                <button
-                  onClick={() => { setShowResetMenu(false); setShowUsers(v => !v); }}
-                  style={{
-                    display: 'block', width: '100%', textAlign: 'left',
-                    padding: '10px 14px', background: 'none', border: 'none',
-                    color: '#e2e8f0', fontSize: 14, cursor: 'pointer',
-                    borderBottom: '1px solid #334155',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                >
-                  {showUsers ? 'Hide players' : 'View players'}
-                </button>
                 <button
                   onClick={() => { setShowResetMenu(false); setShowResetDuplicateConfirm(true); }}
                   style={{
@@ -466,9 +441,7 @@ export default function Album() {
                       lineHeight: '14px', whiteSpace: 'nowrap',
                     }}>+1</span>
                   )}
-                  {showUsers && usersData.length > 0 && (
-                    <UsersBadge pieceId={piece.id} usersData={usersData} />
-                  )}
+
                 </button>
               );
             })}
@@ -481,139 +454,7 @@ export default function Album() {
         </div>
       ); })}
 
-      {showUsers && usersData.length > 0 && (
-        <div className="card" style={{ marginTop: 24 }}>
-          <h3 style={{ marginBottom: 16 }}>Players</h3>
-
-          {allianceMembers.length > 0 && (
-            <>
-              <h4 style={{ marginBottom: 10, fontSize: 13, color: '#3b82f6' }}>
-                My alliance {myAlliance ? `[${myAlliance}]` : ''}
-              </h4>
-              <MemberList members={allianceMembers} album={album} />
-            </>
-          )}
-
-          {otherMembers.length > 0 && (
-            <div style={{ marginTop: allianceMembers.length > 0 ? 20 : 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <h4 style={{ fontSize: 13, color: '#64748b' }}>Other alliances</h4>
-                <button
-                  className="btn-ghost"
-                  style={{ fontSize: 12 }}
-                  onClick={() => setShowOtherAlliances(v => !v)}
-                >
-                  {showOtherAlliances ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              {showOtherAlliances && <MemberList members={otherMembers} showAlliance album={album} />}
-            </div>
-          )}
-        </div>
-      )}
-
-      {showUsers && usersData.length === 0 && (
-        <div className="card" style={{ marginTop: 24, color: '#64748b', fontSize: 14 }}>
-          No other player has listed pieces for this album.
-        </div>
-      )}
     </div>
   );
 }
 
-function MemberList({ members, showAlliance = false, album }) {
-  // Build a map of piece_id -> piece name from the current user's album
-  const pieceMap = {};
-  for (const puzzle of album.puzzles) {
-    for (const piece of puzzle.pieces) {
-      pieceMap[piece.id] = { ...piece, puzzleName: puzzle.name };
-    }
-  }
-
-  // Current user's needs and offers
-  const myNeeds = new Set(
-    Object.entries(pieceMap)
-      .filter(([id]) => pieceMap[id].status === 'need')
-      .map(([id]) => Number(id))
-  );
-  const myOffers = new Set(
-    Object.entries(pieceMap)
-      .filter(([id]) => pieceMap[id].status === 'have_duplicate')
-      .map(([id]) => Number(id))
-  );
-
-  return (
-    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 13 }}>
-      {members.map(member => {
-        // Pieces this member can give me (they have duplicate, I need)
-        const canGiveMe = Object.entries(member.inventory)
-          .filter(([id, s]) => s === 'have_duplicate' && myNeeds.has(Number(id)))
-          .map(([id]) => { const p = pieceMap[id]; return p ? `${p.puzzleName} - ${p.name}` : null; })
-          .filter(Boolean);
-
-        // Pieces I can give them (I have duplicate, they need)
-        const iCanGive = Object.entries(member.inventory)
-          .filter(([id, s]) => s === 'need' && myOffers.has(Number(id)))
-          .map(([id]) => { const p = pieceMap[id]; return p ? `${p.puzzleName} - ${p.name}` : null; })
-          .filter(Boolean);
-
-        const hasMatch = canGiveMe.length > 0 || iCanGive.length > 0;
-
-        return (
-          <div key={member.id} style={{
-            background: '#0f172a',
-            borderRadius: 8,
-            padding: '10px 14px',
-            border: hasMatch ? '1px solid #334155' : '1px solid transparent',
-          }}>
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>
-              {member.username}
-              {showAlliance && member.alliance && (
-                <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{member.alliance}]</span>
-              )}
-            </div>
-            {canGiveMe.length > 0 && (
-              <div style={{ marginBottom: 4 }}>
-                <span style={{ color: STATUS_COLORS.have_duplicate }}>Can give you:</span>
-                <div style={{ paddingLeft: 8, color: '#cbd5e1' }}>{canGiveMe.join(', ')}</div>
-              </div>
-            )}
-            {iCanGive.length > 0 && (
-              <div>
-                <span style={{ color: STATUS_COLORS.need }}>Needs from you:</span>
-                <div style={{ paddingLeft: 8, color: '#cbd5e1' }}>{iCanGive.join(', ')}</div>
-              </div>
-            )}
-            {!hasMatch && (
-              <div style={{ color: '#475569' }}>No match</div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function UsersBadge({ pieceId, usersData }) {
-  const offers = usersData.filter(u => u.inventory[pieceId] === 'have_duplicate');
-  const needs = usersData.filter(u => u.inventory[pieceId] === 'need');
-  if (!offers.length && !needs.length) return null;
-  return (
-    <span style={{
-      position: 'absolute',
-      top: -6,
-      right: -6,
-      background: '#1e293b',
-      border: '1px solid #334155',
-      borderRadius: 10,
-      fontSize: 9,
-      padding: '1px 4px',
-      color: '#e2e8f0',
-      whiteSpace: 'nowrap',
-    }}>
-      {offers.length > 0 && <span style={{ color: STATUS_COLORS.have_duplicate }}>+{offers.length}</span>}
-      {offers.length > 0 && needs.length > 0 && '/'}
-      {needs.length > 0 && <span style={{ color: STATUS_COLORS.need }}>-{needs.length}</span>}
-    </span>
-  );
-}

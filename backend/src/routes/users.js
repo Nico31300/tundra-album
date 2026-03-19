@@ -26,6 +26,74 @@ router.get('/', authMiddleware, (req, res) => {
   })));
 });
 
+// GET /api/users/matches — all pieces I can give or receive from other players, across all albums
+router.get('/matches', authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  const currentUser = db.prepare('SELECT alliance FROM users WHERE id = ?').get(userId);
+
+  // Rows where other users have_duplicate pieces I need
+  const canGiveMeRows = db.prepare(`
+    SELECT u.id, u.username, u.alliance,
+           p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name
+    FROM users u
+    JOIN inventory i_other ON i_other.user_id = u.id AND i_other.status = 'have_duplicate'
+    JOIN pieces p ON p.id = i_other.piece_id
+    JOIN puzzles pz ON pz.id = p.puzzle_id
+    JOIN albums a ON a.id = pz.album_id
+    JOIN inventory i_me ON i_me.piece_id = p.id AND i_me.user_id = ? AND i_me.status = 'need'
+    WHERE u.id != ?
+  `).all(userId, userId);
+
+  // Rows where other users need pieces I have_duplicate
+  const iCanGiveRows = db.prepare(`
+    SELECT u.id, u.username, u.alliance,
+           p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name
+    FROM users u
+    JOIN inventory i_other ON i_other.user_id = u.id AND i_other.status = 'need'
+    JOIN pieces p ON p.id = i_other.piece_id
+    JOIN puzzles pz ON pz.id = p.puzzle_id
+    JOIN albums a ON a.id = pz.album_id
+    JOIN inventory i_me ON i_me.piece_id = p.id AND i_me.user_id = ? AND i_me.status = 'have_duplicate'
+    WHERE u.id != ?
+  `).all(userId, userId);
+
+  // Build player map
+  const playerMap = {};
+  const ensurePlayer = (row) => {
+    if (!playerMap[row.id]) {
+      playerMap[row.id] = {
+        id: row.id,
+        username: row.username,
+        alliance: row.alliance,
+        sameAlliance: !!(currentUser?.alliance && row.alliance === currentUser.alliance),
+        canGiveMe: {},
+        iCanGive: {},
+      };
+    }
+    return playerMap[row.id];
+  };
+
+  for (const row of canGiveMeRows) {
+    const player = ensurePlayer(row);
+    const key = `${row.album_name} – ${row.puzzle_name}`;
+    (player.canGiveMe[key] = player.canGiveMe[key] || []).push(row.piece_name);
+  }
+  for (const row of iCanGiveRows) {
+    const player = ensurePlayer(row);
+    const key = `${row.album_name} – ${row.puzzle_name}`;
+    (player.iCanGive[key] = player.iCanGive[key] || []).push(row.piece_name);
+  }
+
+  const players = Object.values(playerMap).filter(p =>
+    Object.keys(p.canGiveMe).length > 0 || Object.keys(p.iCanGive).length > 0
+  );
+
+  const canReceive = canGiveMeRows.length;
+  const canGive = iCanGiveRows.length;
+
+  res.json({ canReceive, canGive, players });
+});
+
 // GET /api/users/:userId/albums — albums with target user's inventory stats
 router.get('/:userId/albums', authMiddleware, (req, res) => {
   const { userId } = req.params;

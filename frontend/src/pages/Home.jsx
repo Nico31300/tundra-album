@@ -12,12 +12,14 @@ export default function Home() {
   const navigate = useNavigate();
   const [albums, setAlbums] = useState([]);
   const [users, setUsers] = useState([]);
+  const [matches, setMatches] = useState(null);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
   useEffect(() => {
     fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
     fetch('/api/users', { headers }).then(r => r.json()).then(setUsers);
+    fetch('/api/users/matches', { headers }).then(r => r.json()).then(setMatches);
   }, [auth.token]);
 
   const totalPieces = albums.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0);
@@ -40,7 +42,7 @@ export default function Home() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 200px))', gap: 16 }}>
+      <div className="home-cards">
         {/* My Albums card */}
         <div
           className="card"
@@ -104,6 +106,40 @@ export default function Home() {
             )}
             {playersNeed === 0 && playersOffering === 0 && (
               <div style={{ color: '#475569' }}>No active trades</div>
+            )}
+          </div>
+        </div>
+
+        {/* My Matches card */}
+        <div
+          className="card"
+          onClick={() => navigate('/matches')}
+          style={cardStyle}
+          onMouseEnter={e => e.currentTarget.style.background = '#263347'}
+          onMouseLeave={e => e.currentTarget.style.background = ''}
+        >
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Matches</div>
+          <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+            {!matches && <div style={{ color: '#475569' }}>Loading…</div>}
+            {matches && matches.players.length === 0 && (
+              <div style={{ color: '#475569' }}>No matches yet</div>
+            )}
+            {matches && matches.players.length > 0 && (
+              <>
+                <div style={{ color: '#e2e8f0' }}>
+                  {matches.players.length} player{matches.players.length !== 1 ? 's' : ''}
+                </div>
+                {matches.canReceive > 0 && (
+                  <div style={{ color: STATUS_COLORS.have_duplicate }}>
+                    Can receive: {matches.canReceive} piece{matches.canReceive !== 1 ? 's' : ''}
+                  </div>
+                )}
+                {matches.canGive > 0 && (
+                  <div style={{ color: STATUS_COLORS.need }}>
+                    Can give: {matches.canGive} piece{matches.canGive !== 1 ? 's' : ''}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
