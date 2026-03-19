@@ -14,6 +14,7 @@ const STATUS_COLORS = {
   have: '#3b82f6',
 };
 
+
 export default function Album() {
   const { albumId } = useParams();
   const [searchParams] = useSearchParams();
@@ -32,6 +33,7 @@ export default function Album() {
   const [showResetMenu, setShowResetMenu] = useState(false);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
   const [mode, setMode] = useState('need');
+  const [starsMenu, setStarsMenu] = useState(null); // { pieceId, x, y, currentStars }
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -135,7 +137,31 @@ export default function Album() {
     setPendingReset(null);
   }
 
+  async function updatePieceStars(pieceId, stars) {
+    setStarsMenu(null);
+    const res = await fetch(`/api/pieces/${pieceId}/stars`, {
+      method: 'PUT',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stars }),
+    });
+    if (res.ok) {
+      setAlbum(prev => ({
+        ...prev,
+        puzzles: prev.puzzles.map(pz => ({
+          ...pz,
+          pieces: pz.pieces.map(p => p.id === pieceId ? { ...p, stars } : p),
+        })),
+      }));
+    }
+  }
+
+  function handlePieceContextMenu(e, piece) {
+    e.preventDefault();
+    setStarsMenu({ pieceId: piece.id, x: e.clientX, y: e.clientY, currentStars: piece.stars ?? 1 });
+  }
+
   function handlePieceClick(piece) {
+    if ((piece.stars ?? 1) === 5 && (mode === 'need' || mode === 'have_duplicate')) return;
     let next;
     if (piece.status === mode) {
       next = mode === 'have_duplicate' ? 'have' : null;
@@ -158,6 +184,34 @@ export default function Album() {
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
+      {starsMenu && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 299 }} onClick={() => setStarsMenu(null)} />
+          <div style={{
+            position: 'fixed', left: starsMenu.x, top: starsMenu.y, zIndex: 300,
+            background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
+            padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4,
+          }}>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Stars</div>
+            {[1, 2, 3, 4, 5].map(n => (
+              <button
+                key={n}
+                onClick={() => updatePieceStars(starsMenu.pieceId, n)}
+                style={{
+                  background: n === starsMenu.currentStars ? '#334155' : 'none',
+                  border: 'none', borderRadius: 6, padding: '4px 8px',
+                  cursor: 'pointer', textAlign: 'left', fontSize: 13,
+                  color: '#facc15',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                onMouseLeave={e => e.currentTarget.style.background = n === starsMenu.currentStars ? '#334155' : 'none'}
+              >
+                {'★'.repeat(n)}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       <div style={{
         position: 'sticky', top: 54, zIndex: 50,
         background: '#0f172a', paddingTop: 24, marginTop: -24, paddingBottom: 10, marginBottom: 4,
@@ -373,14 +427,17 @@ export default function Album() {
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {puzzle.pieces.map(piece => {
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 100px))', gap: 8, justifyContent: 'center' }}>
+            {puzzle.pieces.map((piece) => {
+              const isFiveStar = (piece.stars ?? 1) === 5;
+              const isDisabledMode = isFiveStar && (mode === 'need' || mode === 'have_duplicate');
               const color = piece.status ? STATUS_COLORS[piece.status] : '#334155';
               const isLoading = pendingPiece === piece.id;
               return (
                 <button
                   key={piece.id}
                   onClick={() => handlePieceClick(piece)}
+                  onContextMenu={(e) => handlePieceContextMenu(e, piece)}
                   disabled={isLoading}
                   title={piece.status ? STATUS_LABELS[piece.status] : 'No status'}
                   style={{
@@ -393,10 +450,12 @@ export default function Album() {
                     fontWeight: 600,
                     minWidth: 60,
                     position: 'relative',
-                    opacity: isLoading ? 0.5 : 1,
+                    opacity: isLoading ? 0.5 : isDisabledMode ? 0.35 : 1,
+                    cursor: isDisabledMode ? 'default' : 'pointer',
                   }}
                 >
                   {piece.name}
+                  <div style={{ fontSize: 10, fontWeight: 400, marginTop: 1, color: '#facc15' }}>{'★'.repeat(piece.stars ?? 1)}</div>
                   {showUsers && usersData.length > 0 && (
                     <UsersBadge pieceId={piece.id} usersData={usersData} />
                   )}
