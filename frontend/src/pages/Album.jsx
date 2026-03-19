@@ -154,7 +154,7 @@ export default function Album() {
         background: '#0f172a', paddingBottom: 10, marginBottom: 4,
       }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <Link to="/" style={{ color: '#64748b', fontSize: 14 }}>← Albums</Link>
+        <Link to="/albums" style={{ color: '#64748b', fontSize: 14 }}>← Albums</Link>
         {prevAlbum && (
           <Link to={`/albums/${prevAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '4px 10px' }} title={prevAlbum.name}>‹</Link>
         )}

@@ -4,7 +4,9 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Albums from './pages/Albums';
+import Players from './pages/Players';
 import Album from './pages/Album';
 import PlayerAlbums from './pages/PlayerAlbums';
 import PlayerAlbum from './pages/PlayerAlbum';
@@ -36,8 +38,10 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-        <Route path="/" element={<PrivateRoute><Albums /></PrivateRoute>} />
+        <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+        <Route path="/albums" element={<PrivateRoute><Albums /></PrivateRoute>} />
         <Route path="/albums/:albumId" element={<PrivateRoute><Album /></PrivateRoute>} />
+        <Route path="/players" element={<PrivateRoute><Players /></PrivateRoute>} />
         <Route path="/players/:userId" element={<PrivateRoute><PlayerAlbums /></PrivateRoute>} />
         <Route path="/players/:userId/albums/:albumId" element={<PrivateRoute><PlayerAlbum /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
