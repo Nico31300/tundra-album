@@ -83,7 +83,7 @@ export default function Album() {
         ...prev,
         puzzles: prev.puzzles.map(pz => ({
           ...pz,
-          pieces: pz.pieces.map(p => p.status === 'have_duplicate' ? { ...p, status: null } : p),
+          pieces: pz.pieces.map(p => p.status === 'have_duplicate' ? { ...p, status: 'have' } : p),
         })),
       }));
     }
@@ -106,7 +106,12 @@ export default function Album() {
   }
 
   function handlePieceClick(piece) {
-    const next = piece.status === mode ? null : mode;
+    let next;
+    if (piece.status === mode) {
+      next = mode === 'have_duplicate' ? 'have' : null;
+    } else {
+      next = mode;
+    }
     setPieceStatus(piece.id, next);
   }
 

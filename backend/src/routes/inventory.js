@@ -68,7 +68,8 @@ router.delete('/album/:albumId/duplicates', authMiddleware, (req, res) => {
     if (!album) return res.status(404).json({ error: 'Album introuvable' });
 
     db.prepare(`
-      DELETE FROM inventory
+      UPDATE inventory
+      SET status = 'have', updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ? AND status = 'have_duplicate' AND piece_id IN (
         SELECT p.id FROM pieces p
         JOIN puzzles pz ON pz.id = p.puzzle_id
