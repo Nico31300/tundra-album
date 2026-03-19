@@ -25,10 +25,7 @@ export default function Players() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <Link to="/" style={{ color: '#64748b', fontSize: 14 }}>← Home</Link>
-        <h2>Players</h2>
-      </div>
+      <h2 style={{ marginBottom: 20 }}>Players</h2>
 
       {users.length === 0 && (
         <div style={{ color: '#64748b', fontSize: 14 }}>No players yet.</div>

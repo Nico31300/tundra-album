@@ -5,10 +5,14 @@ import { useNavigate, Link } from 'react-router-dom';
 export default function Navbar() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef(null);
+
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const avatarRef = useRef(null);
 
   function handleLogout() {
     logout();
@@ -17,14 +21,14 @@ export default function Navbar() {
 
   useEffect(() => {
     const q = query.trim();
-    if (!q) { setResults([]); setOpen(false); return; }
+    if (!q) { setResults([]); setSearchOpen(false); return; }
 
     const timeout = setTimeout(() => {
       fetch(`/api/search?q=${encodeURIComponent(q)}`, {
         headers: { Authorization: `Bearer ${auth.token}` },
       })
         .then(r => r.json())
-        .then(data => { setResults(data); setOpen(data.length > 0); });
+        .then(data => { setResults(data); setSearchOpen(data.length > 0); });
     }, 250);
 
     return () => clearTimeout(timeout);
@@ -33,7 +37,10 @@ export default function Navbar() {
   useEffect(() => {
     function handleClick(e) {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setOpen(false);
+        setSearchOpen(false);
+      }
+      if (avatarRef.current && !avatarRef.current.contains(e.target)) {
+        setAvatarOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
@@ -43,33 +50,38 @@ export default function Navbar() {
   function handleSelect(albumId, puzzleId) {
     setQuery('');
     setResults([]);
-    setOpen(false);
+    setSearchOpen(false);
     navigate(`/albums/${albumId}?puzzleId=${puzzleId}`);
   }
 
+  const initial = auth?.username?.[0]?.toUpperCase() ?? '?';
+
   return (
     <nav style={{
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
+      position: 'sticky', top: 0, zIndex: 100,
       background: '#1e293b',
       borderBottom: '1px solid #334155',
-      padding: '12px 24px',
+      padding: '0 24px',
+      height: 54,
       display: 'flex',
       alignItems: 'center',
       gap: 16,
     }}>
-      <span style={{ fontWeight: 700, fontSize: 16 }}>Tundra Albums</span>
+      {/* Left: title */}
+      <Link to="/" style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', color: '#e2e8f0' }}>
+        Tundra Albums
+      </Link>
 
+      {/* Mid: search */}
       {auth && (
-        <div ref={searchRef} style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+        <div ref={searchRef} style={{ flex: 1, position: 'relative', maxWidth: 400, margin: '0 auto' }}>
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search a puzzle..."
-            style={{ width: '100%', padding: '6px 12px', fontSize: 13 }}
+            style={{ width: '100%', padding: '6px 12px', fontSize: 16 }}
           />
-          {open && (
+          {searchOpen && (
             <div style={{
               position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4,
               background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
@@ -92,34 +104,63 @@ export default function Navbar() {
         </div>
       )}
 
-      <span style={{ flex: 1 }} />
+      {/* Right: avatar */}
       {auth && (
-        <>
-          <span style={{ fontSize: 14, color: '#94a3b8' }}>
-            {auth.username}
-            {auth.alliance && <span style={{ color: '#3b82f6', marginLeft: 8 }}>[{auth.alliance}]</span>}
-          </span>
-          <Link to="/settings" title="Settings" style={{ color: '#64748b', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#e2e8f0'}
-            onMouseLeave={e => e.currentTarget.style.color = '#64748b'}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
-                a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
-                A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06
-                A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
-                A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06
-                A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09
-                a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06
-                A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
-                a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </Link>
-          <button className="btn-ghost" onClick={handleLogout} style={{ padding: '6px 12px' }}>
-            Logout
+        <div ref={avatarRef} style={{ position: 'relative', marginLeft: 'auto' }}>
+          <button
+            onClick={() => setAvatarOpen(v => !v)}
+            style={{
+              width: 34, height: 34, borderRadius: '50%',
+              background: '#3b82f6', color: '#fff',
+              fontWeight: 700, fontSize: 14,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: 'none', cursor: 'pointer', padding: 0,
+              flexShrink: 0,
+            }}
+          >
+            {initial}
           </button>
-        </>
+
+          {avatarOpen && (
+            <div style={{
+              position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+              background: '#1e293b', border: '1px solid #334155', borderRadius: 10,
+              minWidth: 180, zIndex: 200, overflow: 'hidden',
+            }}>
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{auth.username}</div>
+                {auth.alliance && (
+                  <div style={{ color: '#3b82f6', fontSize: 13, marginTop: 2 }}>[{auth.alliance}]</div>
+                )}
+              </div>
+              <Link
+                to="/settings"
+                onClick={() => setAvatarOpen(false)}
+                style={{
+                  display: 'block', padding: '10px 16px', fontSize: 13,
+                  color: '#e2e8f0',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                onMouseLeave={e => e.currentTarget.style.background = ''}
+              >
+                Settings
+              </Link>
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '10px 16px', fontSize: 13,
+                  background: 'none', border: 'none', color: '#f87171', cursor: 'pointer',
+                  borderTop: '1px solid #334155',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                onMouseLeave={e => e.currentTarget.style.background = ''}
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </nav>
   );

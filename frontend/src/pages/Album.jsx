@@ -162,24 +162,35 @@ export default function Album() {
         position: 'sticky', top: 54, zIndex: 50,
         background: '#0f172a', paddingTop: 24, marginTop: -24, paddingBottom: 10, marginBottom: 4,
       }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <Link to="/albums" style={{ color: '#64748b', fontSize: 14 }}>← Albums</Link>
-        {prevAlbum && (
-          <Link to={`/albums/${prevAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '4px 10px' }} title={prevAlbum.name}>‹</Link>
-        )}
-        <h2 style={{ flex: 1 }}>{album.name}</h2>
-        {nextAlbum && (
-          <Link to={`/albums/${nextAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '4px 10px' }} title={nextAlbum.name}>›</Link>
-        )}
-        <button
-          className={showUsers ? 'btn-primary' : 'btn-ghost'}
-          onClick={() => setShowUsers(v => !v)}
-        >
-          {showUsers ? 'Hide players' : 'View players'}
-        </button>
-        <div style={{ position: 'relative' }}>
-          <button className="btn-ghost" onClick={() => setShowResetMenu(v => !v)}>
-            Album actions ▾
+      {/* Row 1: back | ‹ title › | actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <Link to="/albums" className="btn-ghost" title="Albums" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, justifyContent: 'center', minWidth: 0 }}>
+          {prevAlbum
+            ? <Link to={`/albums/${prevAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '2px 8px', flexShrink: 0 }} title={prevAlbum.name}>‹</Link>
+            : <span style={{ width: 34 }} />
+          }
+          <h2 style={{ fontSize: 18, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{album.name}</h2>
+          {nextAlbum
+            ? <Link to={`/albums/${nextAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '2px 8px', flexShrink: 0 }} title={nextAlbum.name}>›</Link>
+            : <span style={{ width: 34 }} />
+          }
+        </div>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <button
+            className="btn-ghost"
+            style={{ padding: '4px 8px', display: 'flex', alignItems: 'center' }}
+            onClick={() => setShowResetMenu(v => !v)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+            </svg>
           </button>
           {showResetMenu && (
             <>
@@ -192,6 +203,19 @@ export default function Album() {
                 background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
                 minWidth: 200, zIndex: 100, overflow: 'hidden',
               }}>
+                <button
+                  onClick={() => { setShowResetMenu(false); setShowUsers(v => !v); }}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '10px 14px', background: 'none', border: 'none',
+                    color: '#e2e8f0', fontSize: 14, cursor: 'pointer',
+                    borderBottom: '1px solid #334155',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  {showUsers ? 'Hide players' : 'View players'}
+                </button>
                 <button
                   onClick={() => { setShowResetMenu(false); setShowResetDuplicateConfirm(true); }}
                   style={{
@@ -258,7 +282,7 @@ export default function Album() {
         </div>
       )}
 
-      {/* Mode toggle */}
+      {/* Row 2: mode toggle */}
       <div style={{ display: 'flex', gap: 8 }}>
         <button
           onClick={() => setMode('need')}
@@ -297,7 +321,7 @@ export default function Album() {
         const isCompleted = puzzle.pieces.length > 0 && puzzle.pieces.every(p => p.status === 'have' || p.status === 'have_duplicate');
         const isHighlighted = puzzle.id === highlightedPuzzleId;
         return (
-        <div key={puzzle.id} ref={el => puzzleRefs.current[puzzle.id] = el} className="card" style={{ marginBottom: 16, background: isCompleted ? '#0f2744' : '', borderColor: isHighlighted ? '#3b82f6' : isCompleted ? '#1d4ed8' : '' }}>
+        <div key={puzzle.id} ref={el => puzzleRefs.current[puzzle.id] = el} className="card" style={{ marginBottom: 16, background: isCompleted ? '#0f2744' : '', borderColor: isHighlighted ? '#facc15' : isCompleted ? '#1d4ed8' : '' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <h3 style={{ flex: 1, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
             <div style={{ position: 'relative' }}>

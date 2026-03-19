@@ -19,10 +19,7 @@ export default function Albums() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <Link to="/" style={{ color: '#64748b', fontSize: 14 }}>← Home</Link>
-        <h2>My Albums</h2>
-      </div>
+      <h2 style={{ marginBottom: 20 }}>My Albums</h2>
       <div className="grid-3" style={{ gridAutoRows: '1fr' }}>
         {albums.map(album => {
           const allDone = album.stats?.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
