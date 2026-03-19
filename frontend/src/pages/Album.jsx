@@ -22,6 +22,7 @@ export default function Album() {
   const [showUsers, setShowUsers] = useState(false);
   const [pendingPiece, setPendingPiece] = useState(null);
   const [pendingReset, setPendingReset] = useState(null);
+  const [openActionMenu, setOpenActionMenu] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showResetDuplicateConfirm, setShowResetDuplicateConfirm] = useState(false);
   const [showResetMenu, setShowResetMenu] = useState(false);
@@ -90,6 +91,7 @@ export default function Album() {
   }
 
   async function resetPuzzle(puzzleId) {
+    setOpenActionMenu(null);
     setPendingReset(puzzleId);
     const res = await fetch(`/api/inventory/puzzle/${puzzleId}`, { method: 'DELETE', headers });
     if (res.ok) {
@@ -98,6 +100,23 @@ export default function Album() {
         puzzles: prev.puzzles.map(pz =>
           pz.id === puzzleId
             ? { ...pz, pieces: pz.pieces.map(p => ({ ...p, status: null })) }
+            : pz
+        ),
+      }));
+    }
+    setPendingReset(null);
+  }
+
+  async function completePuzzle(puzzleId) {
+    setOpenActionMenu(null);
+    setPendingReset(puzzleId);
+    const res = await fetch(`/api/inventory/puzzle/${puzzleId}/complete`, { method: 'PUT', headers });
+    if (res.ok) {
+      setAlbum(prev => ({
+        ...prev,
+        puzzles: prev.puzzles.map(pz =>
+          pz.id === puzzleId
+            ? { ...pz, pieces: pz.pieces.map(p => ({ ...p, status: p.status === 'have_duplicate' ? 'have_duplicate' : 'have' })) }
             : pz
         ),
       }));
@@ -124,7 +143,11 @@ export default function Album() {
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: '#0f172a', paddingBottom: 10, marginBottom: 4,
+      }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <Link to="/" style={{ color: '#64748b', fontSize: 14 }}>← Albums</Link>
         <h2 style={{ flex: 1 }}>{album.name}</h2>
         <button
@@ -135,7 +158,7 @@ export default function Album() {
         </button>
         <div style={{ position: 'relative' }}>
           <button className="btn-ghost" onClick={() => setShowResetMenu(v => !v)}>
-            Reset ▾
+            Album action ▾
           </button>
           {showResetMenu && (
             <>
@@ -215,7 +238,7 @@ export default function Album() {
       )}
 
       {/* Mode toggle */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
         <button
           onClick={() => setMode('need')}
           style={{
@@ -247,6 +270,7 @@ export default function Album() {
           Have
         </button>
       </div>
+      </div>{/* end sticky wrapper */}
 
       {album.puzzles.map(puzzle => {
         const isCompleted = puzzle.pieces.length > 0 && puzzle.pieces.every(p => p.status === 'have' || p.status === 'have_duplicate');
@@ -254,14 +278,54 @@ export default function Album() {
         <div key={puzzle.id} className="card" style={{ marginBottom: 16, background: isCompleted ? '#0f2744' : '', borderColor: isCompleted ? '#1d4ed8' : '' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <h3 style={{ flex: 1, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
-            <button
-              className="btn-ghost"
-              onClick={() => resetPuzzle(puzzle.id)}
-              disabled={pendingReset === puzzle.id}
-              style={{ fontSize: 12, opacity: pendingReset === puzzle.id ? 0.5 : 1 }}
-            >
-              Reset
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                className="btn-ghost"
+                onClick={() => setOpenActionMenu(v => v === puzzle.id ? null : puzzle.id)}
+                disabled={pendingReset === puzzle.id}
+                style={{ fontSize: 12, opacity: pendingReset === puzzle.id ? 0.5 : 1 }}
+              >
+                Actions ▾
+              </button>
+              {openActionMenu === puzzle.id && (
+                <>
+                  <div
+                    style={{ position: 'fixed', inset: 0, zIndex: 99 }}
+                    onClick={() => setOpenActionMenu(null)}
+                  />
+                  <div style={{
+                    position: 'absolute', right: 0, top: '100%', marginTop: 4,
+                    background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
+                    minWidth: 160, zIndex: 100, overflow: 'hidden',
+                  }}>
+                    <button
+                      onClick={() => completePuzzle(puzzle.id)}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left',
+                        padding: '10px 14px', background: 'none', border: 'none',
+                        color: '#e2e8f0', fontSize: 13, cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      Complete
+                    </button>
+                    <button
+                      onClick={() => resetPuzzle(puzzle.id)}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left',
+                        padding: '10px 14px', background: 'none', border: 'none',
+                        color: '#e2e8f0', fontSize: 13, cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {puzzle.pieces.map(piece => {

@@ -84,6 +84,32 @@ router.delete('/album/:albumId/duplicates', authMiddleware, (req, res) => {
   }
 });
 
+// PUT /api/inventory/puzzle/:puzzleId/complete — mark all pieces of a puzzle as 'have'
+router.put('/puzzle/:puzzleId/complete', authMiddleware, (req, res) => {
+  const { puzzleId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const puzzle = db.prepare('SELECT id FROM puzzles WHERE id = ?').get(puzzleId);
+    if (!puzzle) return res.status(404).json({ error: 'Puzzle introuvable' });
+
+    const pieces = db.prepare('SELECT id FROM pieces WHERE puzzle_id = ?').all(puzzleId);
+    const upsert = db.prepare(`
+      INSERT INTO inventory (user_id, piece_id, status, updated_at)
+      VALUES (?, ?, 'have', CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id, piece_id) DO UPDATE SET
+        status = CASE WHEN inventory.status = 'have_duplicate' THEN 'have_duplicate' ELSE 'have' END,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+    db.transaction((ps) => { for (const p of ps) upsert.run(userId, p.id); })(pieces);
+
+    res.json({ puzzleId: Number(puzzleId) });
+  } catch (e) {
+    console.error('Inventory complete error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // DELETE /api/inventory/puzzle/:puzzleId — reset all pieces of a puzzle for current user
 router.delete('/puzzle/:puzzleId', authMiddleware, (req, res) => {
   const { puzzleId } = req.params;
