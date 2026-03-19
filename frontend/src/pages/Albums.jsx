@@ -39,24 +39,31 @@ export default function Albums() {
           );
         })()}
       </h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gridAutoRows: '1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridAutoRows: '1fr', gap: 12 }}>
         {albums.map(album => {
           const allDone = album.stats?.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
+          const owned = (album.stats?.have ?? 0) + (album.stats?.have_duplicate ?? 0);
           return (
           <Link key={album.id} to={`/albums/${album.id}`} style={{ display: 'flex', height: '100%' }}>
             <div className="card" style={{ cursor: 'pointer', transition: 'background 0.15s', display: 'flex', flexDirection: 'column', flex: 1, background: allDone ? '#0f2744' : '', borderColor: allDone ? '#1d4ed8' : '' }}
               onMouseEnter={e => e.currentTarget.style.background = '#263347'}
               onMouseLeave={e => e.currentTarget.style.background = allDone ? '#0f2744' : ''}>
-              <div style={{ fontWeight: 600, marginBottom: 10 }}>{album.name}</div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ fontWeight: 600 }}>{album.name}</div>
+                {album.stats && (
+                  <span style={{ fontSize: 11, fontWeight: 400, color: '#64748b', marginLeft: 8, flexShrink: 0 }}>{owned}/{album.stats.total}</span>
+                )}
+              </div>
               {album.stats && (
-                <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-                  <div style={{ color: '#64748b' }}>{album.stats.total} pieces</div>
-                  {album.stats.need > 0 && (
-                    <div style={{ color: STATUS_COLORS.need }}>Looking for: {album.stats.need}</div>
-                  )}
-                  {album.stats.have_duplicate > 0 && (
-                    <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicate: {album.stats.have_duplicate}</div>
-                  )}
+                <>
+                  <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                    {album.stats.need > 0 && (
+                      <div style={{ color: STATUS_COLORS.need }}>Looking for: {album.stats.need}</div>
+                    )}
+                    {album.stats.have_duplicate > 0 && (
+                      <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicate: {album.stats.have_duplicate}</div>
+                    )}
+                  </div>
                   {album.stats.total_puzzles > 0 && (
                     <div style={{ marginTop: 8, position: 'relative', background: '#0f172a', borderRadius: 99, height: 18, overflow: 'hidden' }}>
                       <div style={{
@@ -71,7 +78,7 @@ export default function Albums() {
                       </span>
                     </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           </Link>
