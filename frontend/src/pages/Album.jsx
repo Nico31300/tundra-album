@@ -342,8 +342,8 @@ export default function Album() {
           onClick={() => setMode('need')}
           style={{
             padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none',
-            background: mode === 'need' ? STATUS_COLORS.need : '#1e293b',
-            color: mode === 'need' ? '#000' : '#64748b',
+            background: mode === 'need' ? STATUS_COLORS.need : STATUS_COLORS.need + '20',
+            color: mode === 'need' ? '#000' : STATUS_COLORS.need,
           }}
         >
           Looking for
@@ -352,8 +352,8 @@ export default function Album() {
           onClick={() => setMode('have_duplicate')}
           style={{
             padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none',
-            background: mode === 'have_duplicate' ? STATUS_COLORS.have_duplicate : '#1e293b',
-            color: mode === 'have_duplicate' ? '#000' : '#64748b',
+            background: mode === 'have_duplicate' ? STATUS_COLORS.have_duplicate : STATUS_COLORS.have_duplicate + '20',
+            color: mode === 'have_duplicate' ? '#000' : STATUS_COLORS.have_duplicate,
           }}
         >
           Have duplicate
@@ -362,8 +362,8 @@ export default function Album() {
           onClick={() => setMode('have')}
           style={{
             padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none',
-            background: mode === 'have' ? STATUS_COLORS.have : '#1e293b',
-            color: mode === 'have' ? '#fff' : '#64748b',
+            background: mode === 'have' ? STATUS_COLORS.have : STATUS_COLORS.have + '20',
+            color: mode === 'have' ? '#fff' : STATUS_COLORS.have,
           }}
         >
           Have
@@ -431,7 +431,8 @@ export default function Album() {
             {puzzle.pieces.map((piece) => {
               const isFiveStar = (piece.stars ?? 1) === 5;
               const isDisabledMode = isFiveStar && (mode === 'need' || mode === 'have_duplicate');
-              const color = piece.status ? STATUS_COLORS[piece.status] : '#334155';
+              const isDuplicate = piece.status === 'have_duplicate';
+              const color = isDuplicate ? STATUS_COLORS.have : (piece.status ? STATUS_COLORS[piece.status] : '#334155');
               const isLoading = pendingPiece === piece.id;
               return (
                 <button
@@ -456,6 +457,15 @@ export default function Album() {
                 >
                   {piece.name}
                   <div style={{ fontSize: 10, fontWeight: 400, marginTop: 1, color: '#facc15' }}>{'★'.repeat(piece.stars ?? 1)}</div>
+                  {isDuplicate && (
+                    <span style={{
+                      position: 'absolute', bottom: 2, right: 2,
+                      background: '#22c55e', borderRadius: 6,
+                      fontSize: 9, fontWeight: 700,
+                      padding: '1px 4px', color: '#000',
+                      lineHeight: '14px', whiteSpace: 'nowrap',
+                    }}>+1</span>
+                  )}
                   {showUsers && usersData.length > 0 && (
                     <UsersBadge pieceId={piece.id} usersData={usersData} />
                   )}
