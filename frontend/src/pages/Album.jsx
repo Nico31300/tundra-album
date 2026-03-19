@@ -158,7 +158,7 @@ export default function Album() {
         </button>
         <div style={{ position: 'relative' }}>
           <button className="btn-ghost" onClick={() => setShowResetMenu(v => !v)}>
-            Album action ▾
+            Album actions ▾
           </button>
           {showResetMenu && (
             <>
