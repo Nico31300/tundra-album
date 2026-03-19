@@ -18,6 +18,7 @@ export default function Album() {
   const { albumId } = useParams();
   const { auth } = useAuth();
   const [album, setAlbum] = useState(null);
+  const [albums, setAlbums] = useState([]);
   const [usersData, setUsersData] = useState([]);
   const [showUsers, setShowUsers] = useState(false);
   const [pendingPiece, setPendingPiece] = useState(null);
@@ -33,6 +34,7 @@ export default function Album() {
 
   useEffect(() => {
     fetch(`/api/albums/${albumId}`, { headers }).then(r => r.json()).then(setAlbum);
+    fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
   }, [albumId]);
 
   useEffect(() => {
@@ -140,6 +142,10 @@ export default function Album() {
   const allianceMembers = usersData.filter(u => u.sameAlliance);
   const otherMembers = usersData.filter(u => !u.sameAlliance);
 
+  const currentIndex = albums.findIndex(a => a.id === album.id);
+  const prevAlbum = currentIndex > 0 ? albums[currentIndex - 1] : null;
+  const nextAlbum = currentIndex >= 0 && currentIndex < albums.length - 1 ? albums[currentIndex + 1] : null;
+
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
@@ -149,7 +155,13 @@ export default function Album() {
       }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <Link to="/" style={{ color: '#64748b', fontSize: 14 }}>← Albums</Link>
+        {prevAlbum && (
+          <Link to={`/albums/${prevAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '4px 10px' }} title={prevAlbum.name}>‹</Link>
+        )}
         <h2 style={{ flex: 1 }}>{album.name}</h2>
+        {nextAlbum && (
+          <Link to={`/albums/${nextAlbum.id}`} className="btn-ghost" style={{ fontSize: 13, padding: '4px 10px' }} title={nextAlbum.name}>›</Link>
+        )}
         <button
           className={showUsers ? 'btn-primary' : 'btn-ghost'}
           onClick={() => setShowUsers(v => !v)}
