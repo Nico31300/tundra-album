@@ -50,9 +50,33 @@ export default function Players() {
               {showOtherAlliances ? 'Hide' : 'Show'}
             </button>
           </div>
-          {showOtherAlliances && <UserList users={otherMembers} showAlliance />}
+          {showOtherAlliances && (
+            <AllianceGroups users={otherMembers} />
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+function AllianceGroups({ users }) {
+  const groups = [];
+  const seen = {};
+  for (const u of users) {
+    const key = u.alliance || '';
+    if (!seen[key]) { seen[key] = []; groups.push({ alliance: u.alliance, members: seen[key] }); }
+    seen[key].push(u);
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {groups.map(({ alliance, members }) => (
+        <div key={alliance || '__none__'}>
+          <h4 style={{ fontSize: 13, color: '#64748b', marginBottom: 8 }}>
+            {alliance ? `[${alliance}]` : 'No alliance'}
+          </h4>
+          <UserList users={members} />
+        </div>
+      ))}
     </div>
   );
 }
