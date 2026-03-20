@@ -87,6 +87,39 @@ railway run node backend/src/migrate-<name>.js
 
 > After running `migrate-roles.js`, the user with `id = 1` is promoted to **admin**. They must log out and back in for the new role to take effect.
 
+### Database backup
+
+The database is stored on a Railway persistent volume. To download a local copy:
+
+**1. Open an SSH session on Railway**
+```bash
+railway ssh --project=<PROJECT_ID> --environment=<ENVIRONMENT_ID> --service=<SERVICE_ID>
+```
+
+**2. Checkpoint the WAL and create a clean backup**
+```bash
+node -e "const db = require('/app/node_modules/better-sqlite3')('/data/tundra.db'); db.pragma('wal_checkpoint(FULL)'); db.backup('/data/tundra-clean.db').then(() => console.log('done'))"
+exit
+```
+
+**3. Export the backup as base64**
+```bash
+railway ssh --project=<PROJECT_ID> --environment=<ENVIRONMENT_ID> --service=<SERVICE_ID> \
+  -- base64 /data/tundra-clean.db > data/tundra-backup.b64
+```
+
+**4. Decode locally**
+```bash
+tr -d '\r' < data/tundra-backup.b64 | base64 -d > data/tundra-backup.db
+sqlite3 data/tundra-backup.db "PRAGMA integrity_check;"
+```
+
+**5. Use the backup locally**
+```bash
+cp data/tundra.db data/tundra-local.db   # save current local DB
+cp data/tundra-backup.db data/tundra.db
+```
+
 ### Environment variables
 
 | Variable | Description | Default |
