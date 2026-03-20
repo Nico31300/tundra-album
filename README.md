@@ -5,10 +5,13 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 ## Features
 
 - **Album & puzzle browser** — navigate albums, puzzles, and individual pieces
-- **Inventory tracking** — mark each piece as *Looking for* or *Have duplicate*
+- **Inventory tracking** — mark each piece as *Looking for*, *Have*, or *Have duplicate*
+- **Star ratings** — pieces have a 1–5 star rarity; right-click to edit (admin and stars editor only)
 - **Player matching** — see which players can give you pieces you need, and which pieces they need from you
 - **Player profiles** — browse any player's albums and see their inventory read-only, with your own duplicates highlighted
-- **Alliance system** — players belong to alliances; other alliances are hidden by default
+- **Alliance system** — players belong to alliances; the players list groups by alliance
+- **Roles** — three roles control access: *Admin*, *Stars editor*, and *User*
+- **Admin area** — admins can manage users (name, alliance, password, role) and albums (create, rename, reorder, delete, manage puzzles and piece counts)
 
 ## Tech Stack
 
@@ -59,6 +62,9 @@ node src/migrate-piece-names-2.js
 node src/migrate-epic-new-world.js
 node src/migrate-call-of-the-stars.js
 node src/migrate-inventory-updated-at.js
+node src/migrate-inventory-have-status.js
+node src/migrate-piece-stars.js
+node src/migrate-roles.js          # adds roles table and promotes user id=1 to admin
 ```
 
 ## Deployment (Railway)
@@ -78,6 +84,8 @@ cd frontend && npm run build
 ```bash
 railway run node backend/src/migrate-<name>.js
 ```
+
+> After running `migrate-roles.js`, the user with `id = 1` is promoted to **admin**. They must log out and back in for the new role to take effect.
 
 ### Environment variables
 
