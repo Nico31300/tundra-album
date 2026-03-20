@@ -52,9 +52,10 @@ export default function PlayerAlbum() {
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
               <h3 style={{ flex: 1, fontSize: 15, color: '#94a3b8' }}>{puzzle.name}</h3>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 100px))', gap: 8, justifyContent: 'center' }}>
               {puzzle.pieces.map(piece => {
-                const color = piece.status ? STATUS_COLORS[piece.status] : '#334155';
+                const isDuplicate = piece.status === 'have_duplicate';
+                const color = isDuplicate ? STATUS_COLORS.have : (piece.status ? STATUS_COLORS[piece.status] : '#334155');
                 const iCanOffer = piece.my_status === 'have_duplicate';
                 return (
                   <div
@@ -78,17 +79,26 @@ export default function PlayerAlbum() {
                     }}
                   >
                     {piece.name}
+                    <div style={{ fontSize: 10, fontWeight: 400, marginTop: 1, color: '#facc15' }}>{'★'.repeat(piece.stars ?? 1)}</div>
+                    {isDuplicate && (
+                      <span style={{
+                        position: 'absolute', bottom: 2, right: 2,
+                        background: '#22c55e', borderRadius: 6,
+                        fontSize: 9, fontWeight: 700,
+                        padding: '1px 4px', color: '#000',
+                        lineHeight: '14px', whiteSpace: 'nowrap',
+                      }}>+1</span>
+                    )}
                   </div>
                 );
               })}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-              {puzzle.last_updated
-                ? <span style={{ fontSize: 12, color: '#64748b' }}>Last updated: {formatRelative(puzzle.last_updated)}</span>
-                : <span />
-              }
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 10 }}>
               {isCompleted && (
                 <span style={{ fontSize: 16, color: '#3b82f6', fontWeight: 700, cursor: 'default', userSelect: 'none' }}>✓</span>
+              )}
+              {puzzle.last_updated && (
+                <span style={{ fontSize: 12, color: '#64748b' }}>Last updated: {formatRelative(puzzle.last_updated)}</span>
               )}
             </div>
           </div>
