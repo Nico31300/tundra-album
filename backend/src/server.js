@@ -8,6 +8,7 @@ const inventoryRoutes = require('./routes/inventory');
 const usersRoutes = require('./routes/users');
 const searchRoutes = require('./routes/search');
 const piecesRoutes = require('./routes/pieces');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +26,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/pieces', piecesRoutes);
+app.use('/api/admin', adminRoutes);
 
 if (isProd) {
   const frontendDist = path.join(__dirname, '../../frontend/dist');

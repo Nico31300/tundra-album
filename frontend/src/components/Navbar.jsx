@@ -133,6 +133,17 @@ export default function Navbar() {
                   <div style={{ color: '#3b82f6', fontSize: 13, marginTop: 2 }}>[{auth.alliance}]</div>
                 )}
               </div>
+              {auth.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  onClick={() => setAvatarOpen(false)}
+                  style={{ display: 'block', padding: '10px 16px', fontSize: 13, color: '#a855f7' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                  onMouseLeave={e => e.currentTarget.style.background = ''}
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 to="/settings"
                 onClick={() => setAvatarOpen(false)}

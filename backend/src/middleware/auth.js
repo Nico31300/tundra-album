@@ -16,4 +16,13 @@ function authMiddleware(req, res, next) {
   }
 }
 
-module.exports = { authMiddleware, JWT_SECRET };
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+    next();
+  };
+}
+
+module.exports = { authMiddleware, requireRole, JWT_SECRET };

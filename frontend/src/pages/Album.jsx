@@ -148,6 +148,7 @@ useEffect(() => {
   }
 
   function handlePieceContextMenu(e, piece) {
+    if (auth.role !== 'admin' && auth.role !== 'stars_editor') return;
     e.preventDefault();
     setStarsMenu({ pieceId: piece.id, x: e.clientX, y: e.clientY, currentStars: piece.stars ?? 1 });
   }

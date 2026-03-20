@@ -1,11 +1,11 @@
 const express = require('express');
 const db = require('../database');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-// PUT /api/pieces/:pieceId/stars — update star rating of a piece (admin action)
-router.put('/:pieceId/stars', authMiddleware, (req, res) => {
+// PUT /api/pieces/:pieceId/stars — update star rating of a piece (admin/stars_editor only)
+router.put('/:pieceId/stars', authMiddleware, requireRole('admin', 'stars_editor'), (req, res) => {
   const { pieceId } = req.params;
   const { stars } = req.body;
 

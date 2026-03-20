@@ -49,4 +49,19 @@ db.exec(`
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS roles (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL
+  );
+`);
+
+db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'admin')`).run();
+db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'stars_editor')`).run();
+db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (3, 'user')`).run();
+
+try {
+  db.prepare(`ALTER TABLE users ADD COLUMN role_id INTEGER NOT NULL DEFAULT 3`).run();
+} catch {}
+
 module.exports = db;

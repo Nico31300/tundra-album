@@ -16,8 +16,8 @@ router.post('/register', (req, res) => {
     const result = db.prepare(
       'INSERT INTO users (username, password_hash, alliance) VALUES (?, ?, ?)'
     ).run(username, hash, alliance || null);
-    const token = jwt.sign({ id: result.lastInsertRowid, username }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, username, alliance: alliance || null });
+    const token = jwt.sign({ id: result.lastInsertRowid, username, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, username, alliance: alliance || null, role: 'user' });
   } catch (e) {
     if (e.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Nom d\'utilisateur déjà pris' });
@@ -28,12 +28,12 @@ router.post('/register', (req, res) => {
 
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  const user = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.username = ?').get(username);
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'Identifiants invalides' });
   }
-  const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token, username: user.username, alliance: user.alliance });
+  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token, username: user.username, alliance: user.alliance, role: user.role });
 });
 
 router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res) => {
@@ -48,9 +48,9 @@ router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res
     db.prepare('UPDATE users SET username = ?, alliance = ? WHERE id = ?')
       .run(username.trim(), alliance?.trim() || null, userId);
 
-    const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-    const token = jwt.sign({ id: updated.id, username: updated.username }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, username: updated.username, alliance: updated.alliance });
+    const updated = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?').get(userId);
+    const token = jwt.sign({ id: updated.id, username: updated.username, role: updated.role }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role });
   } catch (e) {
     if (e.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Nom d\'utilisateur déjà pris' });

@@ -7,13 +7,15 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
     const alliance = localStorage.getItem('alliance');
-    return token ? { token, username, alliance } : null;
+    const role = localStorage.getItem('role') || 'user';
+    return token ? { token, username, alliance, role } : null;
   });
 
   function login(data) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('username', data.username);
     localStorage.setItem('alliance', data.alliance || '');
+    localStorage.setItem('role', data.role || 'user');
     setAuth(data);
   }
 
@@ -21,6 +23,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('username', data.username);
     localStorage.setItem('alliance', data.alliance || '');
+    localStorage.setItem('role', data.role || 'user');
     setAuth(data);
   }
 
