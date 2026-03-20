@@ -1,2 +1,5 @@
+[build]
+watchPatterns = ["**", "!*.md"]
+
 [deploy]
 startCommand = "node backend/src/server.js"
