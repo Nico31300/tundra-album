@@ -32,7 +32,7 @@ export default function PlayerAlbums() {
           {user.alliance && <span style={{ color: '#64748b', fontWeight: 400, fontSize: 16, marginLeft: 8 }}>[{user.alliance}]</span>}
         </h2>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridAutoRows: '1fr', gap: 12 }}>
+      <div className="grid-3" style={{ gridAutoRows: '1fr' }}>
         {albums.map(album => {
           const allDone = album.stats.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
           const owned = (album.stats.have ?? 0) + (album.stats.have_duplicate ?? 0);

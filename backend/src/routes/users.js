@@ -108,6 +108,7 @@ router.get('/:userId/albums', authMiddleware, (req, res) => {
            COUNT(DISTINCT pz.id) AS total_puzzles,
            COUNT(p.id) AS total,
            SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
+           SUM(CASE WHEN i.status = 'have' THEN 1 ELSE 0 END) AS have,
            SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate,
            MAX(i.updated_at) AS last_updated
     FROM puzzles pz
