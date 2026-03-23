@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { version } from '../../package.json';
 
 export default function Navbar() {
   const { auth, logout } = useAuth();
@@ -68,8 +69,9 @@ export default function Navbar() {
       gap: 16,
     }}>
       {/* Left: title */}
-      <Link to="/" style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', color: '#e2e8f0' }}>
+      <Link to="/" style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', color: '#e2e8f0', display: 'flex', alignItems: 'baseline', gap: 6 }}>
         Tundra Albums
+        <span style={{ fontSize: 11, fontWeight: 400, color: '#475569' }}>v{version}</span>
       </Link>
 
       {/* Mid: search */}
