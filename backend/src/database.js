@@ -64,4 +64,56 @@ try {
   db.prepare(`ALTER TABLE users ADD COLUMN role_id INTEGER NOT NULL DEFAULT 3`).run();
 } catch {}
 
+// Migrate: if mission_milestones still has the old 'atlas' text column, drop and recreate
+const mmCols = db.pragma('table_info(mission_milestones)');
+if (mmCols.some(col => col.name === 'atlas')) {
+  db.exec(`
+    DROP TABLE IF EXISTS user_mission_progress;
+    DROP TABLE IF EXISTS mission_milestones;
+  `);
+}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS mission_milestones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    album_id INTEGER NOT NULL REFERENCES albums(id),
+    task TEXT NOT NULL,
+    milestone_number INTEGER NOT NULL,
+    milestone_value TEXT,
+    is_unknown INTEGER NOT NULL DEFAULT 0,
+    is_final_milestone INTEGER NOT NULL DEFAULT 0,
+    rarity TEXT,
+    fragment_reward TEXT,
+    UNIQUE(album_id, task, milestone_number)
+  );
+
+  CREATE TABLE IF NOT EXISTS user_mission_progress (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    milestone_id INTEGER NOT NULL REFERENCES mission_milestones(id) ON DELETE CASCADE,
+    completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, milestone_id)
+  );
+`);
+
+const milestoneCount = db.prepare('SELECT COUNT(*) as c FROM mission_milestones').get();
+if (milestoneCount.c === 0) {
+  const MILESTONES = require('./missions-seed');
+  const albumIdByName = Object.fromEntries(
+    db.prepare('SELECT id, name FROM albums').all().map(a => [a.name, a.id])
+  );
+  const insertMilestone = db.prepare(`
+    INSERT OR IGNORE INTO mission_milestones
+      (album_id, task, milestone_number, milestone_value, is_unknown, is_final_milestone, rarity, fragment_reward)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const seedAll = db.transaction((rows) => {
+    for (const [albumName, task, milestoneNum, value, isUnknown, isFinal, rarity, reward] of rows) {
+      const albumId = albumIdByName[albumName];
+      if (albumId == null) continue;
+      insertMilestone.run(albumId, task, milestoneNum, value, isUnknown, isFinal, rarity, reward);
+    }
+  });
+  seedAll(MILESTONES);
+}
+
 module.exports = db;

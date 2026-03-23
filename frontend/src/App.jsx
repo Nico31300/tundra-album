@@ -13,6 +13,7 @@ import PlayerAlbum from './pages/PlayerAlbum';
 import Settings from './pages/Settings';
 import Matches from './pages/Matches';
 import Admin from './pages/Admin';
+import Missions from './pages/Missions';
 
 function PrivateRoute({ children }) {
   const { auth } = useAuth();
@@ -49,6 +50,7 @@ function AppRoutes() {
         <Route path="/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
+        <Route path="/missions" element={<PrivateRoute><Missions /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />

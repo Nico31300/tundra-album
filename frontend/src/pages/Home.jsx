@@ -13,6 +13,7 @@ export default function Home() {
   const [albums, setAlbums] = useState([]);
   const [users, setUsers] = useState([]);
   const [matches, setMatches] = useState(null);
+  const [missions, setMissions] = useState(null);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -20,6 +21,7 @@ export default function Home() {
     fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
     fetch('/api/users', { headers }).then(r => r.json()).then(setUsers);
     fetch('/api/users/matches', { headers }).then(r => r.json()).then(setMatches);
+    fetch('/api/missions', { headers }).then(r => r.json()).then(setMissions);
   }, [auth.token]);
 
   const totalPieces = albums.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0);
@@ -143,6 +145,49 @@ export default function Home() {
             )}
           </div>
         </div>
+        {/* My Missions card */}
+        <div
+          className="card"
+          onClick={() => navigate('/missions')}
+          style={cardStyle}
+          onMouseEnter={e => e.currentTarget.style.background = '#263347'}
+          onMouseLeave={e => e.currentTarget.style.background = ''}
+        >
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Missions</div>
+          <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+            {!missions && <div style={{ color: '#475569' }}>Loading…</div>}
+          </div>
+          {missions && (() => {
+            const total = missions.tasks.length;
+            const completed = missions.tasks.filter(t => t.allCompleted).length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            return total > 0 ? (
+              <div style={{ marginTop: 'auto' }}>
+                <div style={{ position: 'relative', background: '#0f172a', borderRadius: 99, height: 18, overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${pct}%`,
+                    height: '100%',
+                    background: pct === 100 ? '#22c55e' : '#3b82f6',
+                    borderRadius: 99,
+                    transition: 'width 0.3s',
+                  }} />
+                  <span style={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, color: '#fff',
+                  }}>
+                    {pct}%
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, textAlign: 'right' }}>
+                  {completed}/{total}
+                </div>
+              </div>
+            ) : (
+              <div style={{ color: '#475569', fontSize: 13 }}>No missions</div>
+            );
+          })()}
+        </div>
+
       </div>
     </div>
   );
