@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 const RARITY_BG = {
   Rare: 'rgba(59,130,246,0.15)',
@@ -22,6 +23,7 @@ export default function Missions() {
   const { auth } = useAuth();
   const [data, setData] = useState(null);
   const [albumFilter, setAlbumFilter] = useState('All');
+  const [showCompleted, setShowCompleted] = useState(false);
   const [completing, setCompleting] = useState(null);
   const [resetting, setResetting] = useState(null);
 
@@ -56,7 +58,10 @@ export default function Missions() {
   const albums = data ? data.albums : [];
 
   const visibleTasks = data
-    ? data.tasks.filter(t => albumFilter === 'All' || t.album_name === albumFilter)
+    ? data.tasks.filter(t =>
+        (albumFilter === 'All' || t.album_name === albumFilter) &&
+        (showCompleted || !t.allCompleted)
+      )
     : [];
 
   // Group by album for display
@@ -89,6 +94,24 @@ export default function Missions() {
           {albums.map(a => <option key={a.id} value={a.name}>{a.name}</option>)}
         </select>
 
+        <button
+          onClick={() => setShowCompleted(v => !v)}
+          title={showCompleted ? 'Hide completed' : 'Show completed'}
+          style={{
+            background: showCompleted ? '#22c55e20' : 'transparent',
+            color: showCompleted ? '#22c55e' : '#475569',
+            border: `1px solid ${showCompleted ? '#22c55e40' : '#334155'}`,
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: 15,
+            cursor: 'pointer',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {showCompleted ? <Eye size={16} /> : <EyeOff size={16} />}
+        </button>
 
       </div>
 

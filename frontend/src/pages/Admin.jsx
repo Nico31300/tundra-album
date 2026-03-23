@@ -14,7 +14,7 @@ export default function Admin() {
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ marginBottom: 20 }}>Admin</h2>
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, borderBottom: '1px solid #334155', paddingBottom: 0 }}>
-        {['users', 'albums'].map(t => (
+        {['users', 'albums', 'missions'].map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -31,6 +31,7 @@ export default function Admin() {
       </div>
       {tab === 'users' && <UsersTab />}
       {tab === 'albums' && <AlbumsTab />}
+      {tab === 'missions' && <MissionsTab />}
     </div>
   );
 }
@@ -495,5 +496,231 @@ function PuzzleManager({ album, headers, onPuzzlesChange }) {
         )}
       </div>
     </div>
+  );
+}
+
+const RARITIES = ['', 'Rare', 'Epic', 'Mythic'];
+const REWARDS = ['', 'Rare Puzzle Fragment', 'Epic Puzzle Fragment', 'Mythic Puzzle Fragment'];
+
+function MissionsTab() {
+  const { auth } = useAuth();
+  const headers = { Authorization: `Bearer ${auth.token}`, 'Content-Type': 'application/json' };
+  const [milestones, setMilestones] = useState([]);
+  const [albums, setAlbums] = useState([]);
+  const [expandedAlbum, setExpandedAlbum] = useState(null);
+  const [modal, setModal] = useState(null); // { mode: 'add'|'edit', albumId?, task?, milestone? }
+  const [form, setForm] = useState({});
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [error, setError] = useState('');
+  const [newTask, setNewTask] = useState({});
+
+  useEffect(() => {
+    fetch('/api/admin/missions', { headers }).then(r => r.json()).then(setMilestones);
+    fetch('/api/admin/albums', { headers }).then(r => r.json()).then(setAlbums);
+  }, []);
+
+  // Group by album > task
+  const grouped = {};
+  for (const m of milestones) {
+    if (!grouped[m.album_id]) grouped[m.album_id] = { album_name: m.album_name, tasks: {} };
+    if (!grouped[m.album_id].tasks[m.task]) grouped[m.album_id].tasks[m.task] = [];
+    grouped[m.album_id].tasks[m.task].push(m);
+  }
+  for (const albumData of Object.values(grouped)) {
+    for (const ms of Object.values(albumData.tasks)) {
+      ms.sort((a, b) => a.milestone_number - b.milestone_number);
+    }
+  }
+
+  function openAdd(albumId, task, nextNum) {
+    setModal({ mode: 'add', albumId, task });
+    setForm({ task: task || '', milestone_number: nextNum || 1, milestone_value: '', is_unknown: false, is_final_milestone: false, rarity: 'Rare', fragment_reward: 'Rare Puzzle Fragment' });
+    setError('');
+  }
+
+  function openEdit(m) {
+    setModal({ mode: 'edit', milestone: m });
+    setForm({ task: m.task, milestone_number: m.milestone_number, milestone_value: m.milestone_value || '', is_unknown: !!m.is_unknown, is_final_milestone: !!m.is_final_milestone, rarity: m.rarity || '', fragment_reward: m.fragment_reward || '' });
+    setError('');
+  }
+
+  async function save() {
+    setError('');
+    const body = {
+      task: form.task,
+      milestone_number: Number(form.milestone_number),
+      milestone_value: form.milestone_value || null,
+      is_unknown: form.is_unknown ? 1 : 0,
+      is_final_milestone: form.is_final_milestone ? 1 : 0,
+      rarity: form.rarity || null,
+      fragment_reward: form.fragment_reward || null,
+    };
+    const isAdd = modal.mode === 'add';
+    const url = isAdd ? '/api/admin/missions' : `/api/admin/missions/${modal.milestone.id}`;
+    const res = await fetch(url, { method: isAdd ? 'POST' : 'PUT', headers, body: JSON.stringify(isAdd ? { ...body, album_id: modal.albumId } : body) });
+    const data = await res.json();
+    if (!res.ok) { setError(data.error); return; }
+    setMilestones(prev => isAdd ? [...prev, data] : prev.map(m => m.id === data.id ? data : m));
+    setModal(null);
+  }
+
+  async function deleteMilestone(id) {
+    const res = await fetch(`/api/admin/missions/${id}`, { method: 'DELETE', headers });
+    if (res.ok) { setMilestones(prev => prev.filter(m => m.id !== id)); setDeleteConfirm(null); }
+  }
+
+  const RARITY_COLOR = { Rare: '#3b82f6', Epic: '#a855f7', Mythic: '#f59e0b' };
+  const RARITY_BG = { Rare: 'rgba(59,130,246,0.15)', Epic: 'rgba(168,85,247,0.15)', Mythic: 'rgba(245,158,11,0.15)' };
+
+  return (
+    <>
+      {modal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
+          <div className="card" style={{ width: '100%', maxWidth: 460 }}>
+            <h3 style={{ marginBottom: 16, fontSize: 16 }}>{modal.mode === 'add' ? 'Add Milestone' : 'Edit Milestone'}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <label style={{ fontSize: 13, color: '#94a3b8' }}>
+                Task
+                <input value={form.task} onChange={e => setForm(f => ({ ...f, task: e.target.value }))} style={{ display: 'block', width: '100%', marginTop: 4 }} />
+              </label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <label style={{ fontSize: 13, color: '#94a3b8', flex: 1 }}>
+                  Milestone #
+                  <input type="number" value={form.milestone_number} onChange={e => setForm(f => ({ ...f, milestone_number: e.target.value }))} style={{ display: 'block', width: '100%', marginTop: 4 }} />
+                </label>
+                <label style={{ fontSize: 13, color: '#94a3b8', flex: 2 }}>
+                  Value
+                  <input value={form.milestone_value} onChange={e => setForm(f => ({ ...f, milestone_value: e.target.value }))} placeholder="e.g. 1,000,000" style={{ display: 'block', width: '100%', marginTop: 4 }} />
+                </label>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <label style={{ fontSize: 13, color: '#94a3b8', flex: 1 }}>
+                  Rarity
+                  <select value={form.rarity} onChange={e => setForm(f => ({ ...f, rarity: e.target.value }))} style={{ display: 'block', width: '100%', marginTop: 4, padding: '6px 10px', background: '#0f172a', color: '#e2e8f0', border: '1px solid #334155', borderRadius: 6 }}>
+                    {RARITIES.map(r => <option key={r} value={r}>{r || '—'}</option>)}
+                  </select>
+                </label>
+                <label style={{ fontSize: 13, color: '#94a3b8', flex: 2 }}>
+                  Fragment Reward
+                  <select value={form.fragment_reward} onChange={e => setForm(f => ({ ...f, fragment_reward: e.target.value }))} style={{ display: 'block', width: '100%', marginTop: 4, padding: '6px 10px', background: '#0f172a', color: '#e2e8f0', border: '1px solid #334155', borderRadius: 6 }}>
+                    {REWARDS.map(r => <option key={r} value={r}>{r || '—'}</option>)}
+                  </select>
+                </label>
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <label style={{ fontSize: 13, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.is_unknown} onChange={e => setForm(f => ({ ...f, is_unknown: e.target.checked }))} />
+                  Unknown
+                </label>
+                <label style={{ fontSize: 13, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.is_final_milestone} onChange={e => setForm(f => ({ ...f, is_final_milestone: e.target.checked }))} />
+                  Final milestone
+                </label>
+              </div>
+              {error && <div style={{ color: '#f87171', fontSize: 13 }}>{error}</div>}
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button className="btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn-primary" onClick={save}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
+          <div className="card" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Delete milestone</div>
+            <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 20 }}>
+              Delete milestone #{deleteConfirm.milestone_number} of <strong>{deleteConfirm.task}</strong>? This cannot be undone.
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="btn-ghost" onClick={() => setDeleteConfirm(null)}>Cancel</button>
+              <button onClick={() => deleteMilestone(deleteConfirm.id)} style={{ padding: '8px 16px', borderRadius: 6, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {albums.map(album => {
+          const albumData = grouped[album.id];
+          const taskCount = albumData ? Object.keys(albumData.tasks).length : 0;
+          const msCount = albumData ? Object.values(albumData.tasks).reduce((s, ms) => s + ms.length, 0) : 0;
+          const isExpanded = expandedAlbum === album.id;
+
+          return (
+            <div key={album.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+                <span style={{ flex: 1, fontWeight: 600 }}>{album.name}</span>
+                <span style={{ fontSize: 12, color: '#64748b' }}>{taskCount} tasks · {msCount} milestones</span>
+                <button
+                  className="btn-ghost"
+                  style={{ fontSize: 12, padding: '4px 10px', color: isExpanded ? '#3b82f6' : '#94a3b8' }}
+                  onClick={() => setExpandedAlbum(v => v === album.id ? null : album.id)}
+                >
+                  {isExpanded ? '▲' : '▼'}
+                </button>
+              </div>
+
+              {isExpanded && (
+                <div style={{ borderTop: '1px solid #334155', background: '#0f172a', padding: '12px 16px' }}>
+                  {albumData && Object.entries(albumData.tasks).map(([taskName, ms]) => (
+                    <div key={taskName} style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                        {taskName}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {ms.map(m => (
+                          <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', background: '#1e293b', borderRadius: 6, fontSize: 12 }}>
+                            <span style={{ color: '#475569', minWidth: 20 }}>#{m.milestone_number}</span>
+                            <span style={{ flex: 1, color: m.is_unknown ? '#475569' : '#e2e8f0' }}>
+                              {m.is_unknown ? '?' : (m.milestone_value || '—')}
+                            </span>
+                            {m.rarity && (
+                              <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, background: RARITY_BG[m.rarity], color: RARITY_COLOR[m.rarity] }}>
+                                {m.rarity}
+                              </span>
+                            )}
+                            {!!m.is_final_milestone && <span style={{ fontSize: 10, color: '#22c55e' }}>Final</span>}
+                            <button className="btn-ghost" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => openEdit(m)}>Edit</button>
+                            <button onClick={() => setDeleteConfirm(m)} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, border: 'none', background: '#ef444420', color: '#f87171', cursor: 'pointer', fontWeight: 600 }}>Del</button>
+                          </div>
+                        ))}
+                      </div>
+                      <button className="btn-ghost" style={{ marginTop: 4, fontSize: 11, padding: '2px 10px' }} onClick={() => openAdd(album.id, taskName, ms.length + 1)}>
+                        + Add milestone
+                      </button>
+                    </div>
+                  ))}
+
+                  <div style={{ marginTop: albumData ? 8 : 0, display: 'flex', gap: 8 }}>
+                    <input
+                      value={newTask[album.id] || ''}
+                      onChange={e => setNewTask(nt => ({ ...nt, [album.id]: e.target.value }))}
+                      placeholder="New task name..."
+                      style={{ flex: 1, fontSize: 12 }}
+                    />
+                    <button
+                      className="btn-primary"
+                      style={{ fontSize: 12 }}
+                      onClick={() => {
+                        if (!newTask[album.id]?.trim()) return;
+                        openAdd(album.id, newTask[album.id].trim(), 1);
+                        setNewTask(nt => ({ ...nt, [album.id]: '' }));
+                      }}
+                    >
+                      Add task
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }

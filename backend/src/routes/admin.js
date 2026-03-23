@@ -207,4 +207,70 @@ router.get('/roles', (req, res) => {
   res.json(db.prepare('SELECT * FROM roles ORDER BY id').all());
 });
 
+// GET /api/admin/missions
+router.get('/missions', (req, res) => {
+  const rows = db.prepare(`
+    SELECT m.*, a.name AS album_name
+    FROM mission_milestones m
+    JOIN albums a ON a.id = m.album_id
+    ORDER BY a.name, m.task, m.milestone_number
+  `).all();
+  res.json(rows);
+});
+
+// POST /api/admin/missions
+router.post('/missions', (req, res) => {
+  const { album_id, task, milestone_number, milestone_value, is_unknown, is_final_milestone, rarity, fragment_reward } = req.body;
+  if (!album_id || !task?.trim()) return res.status(400).json({ error: 'album_id and task are required' });
+  try {
+    const result = db.prepare(`
+      INSERT INTO mission_milestones (album_id, task, milestone_number, milestone_value, is_unknown, is_final_milestone, rarity, fragment_reward)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(album_id, task.trim(), milestone_number ?? 1, milestone_value || null, is_unknown ? 1 : 0, is_final_milestone ? 1 : 0, rarity || null, fragment_reward || null);
+    const row = db.prepare('SELECT m.*, a.name AS album_name FROM mission_milestones m JOIN albums a ON a.id = m.album_id WHERE m.id = ?').get(result.lastInsertRowid);
+    res.json(row);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PUT /api/admin/missions/:id
+router.put('/missions/:id', (req, res) => {
+  const { id } = req.params;
+  const { task, milestone_number, milestone_value, is_unknown, is_final_milestone, rarity, fragment_reward } = req.body;
+  const m = db.prepare('SELECT * FROM mission_milestones WHERE id = ?').get(id);
+  if (!m) return res.status(404).json({ error: 'Not found' });
+  try {
+    db.prepare(`
+      UPDATE mission_milestones SET
+        task = ?, milestone_number = ?, milestone_value = ?,
+        is_unknown = ?, is_final_milestone = ?, rarity = ?, fragment_reward = ?
+      WHERE id = ?
+    `).run(
+      task !== undefined ? task : m.task,
+      milestone_number !== undefined ? Number(milestone_number) : m.milestone_number,
+      milestone_value !== undefined ? (milestone_value || null) : m.milestone_value,
+      is_unknown !== undefined ? (is_unknown ? 1 : 0) : m.is_unknown,
+      is_final_milestone !== undefined ? (is_final_milestone ? 1 : 0) : m.is_final_milestone,
+      rarity !== undefined ? (rarity || null) : m.rarity,
+      fragment_reward !== undefined ? (fragment_reward || null) : m.fragment_reward,
+      id
+    );
+    const row = db.prepare('SELECT m.*, a.name AS album_name FROM mission_milestones m JOIN albums a ON a.id = m.album_id WHERE m.id = ?').get(id);
+    res.json(row);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DELETE /api/admin/missions/:id
+router.delete('/missions/:id', (req, res) => {
+  const { id } = req.params;
+  const m = db.prepare('SELECT * FROM mission_milestones WHERE id = ?').get(id);
+  if (!m) return res.status(404).json({ error: 'Not found' });
+  db.prepare('DELETE FROM user_mission_progress WHERE milestone_id = ?').run(id);
+  db.prepare('DELETE FROM mission_milestones WHERE id = ?').run(id);
+  res.json({ id: Number(id) });
+});
+
 module.exports = router;
