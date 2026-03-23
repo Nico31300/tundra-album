@@ -88,8 +88,8 @@ router.get('/matches', authMiddleware, (req, res) => {
     Object.keys(p.canGiveMe).length > 0 || Object.keys(p.iCanGive).length > 0
   );
 
-  const canReceive = canGiveMeRows.length;
-  const canGive = iCanGiveRows.length;
+  const canReceive = new Set(canGiveMeRows.map(r => r.piece_id)).size;
+  const canGive = new Set(iCanGiveRows.map(r => r.piece_id)).size;
 
   res.json({ canReceive, canGive, players });
 });
