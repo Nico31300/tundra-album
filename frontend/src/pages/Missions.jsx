@@ -19,6 +19,18 @@ function resolveTask(task, value) {
   return task.replace('X', value);
 }
 
+function recomputeTask(t, milestones) {
+  const total = milestones.length;
+  const completedCount = milestones.filter(m => m.completed).length;
+  const allCompleted = completedCount === total;
+  const current = milestones.find(m => !m.completed) || milestones[milestones.length - 1];
+  const completed = milestones.filter(m => m.completed);
+  const previous = completed.length > 0 ? completed[completed.length - 1] : null;
+  const finalMilestone = milestones.find(m => m.is_final_milestone) || milestones[milestones.length - 1];
+  const max_value = finalMilestone?.milestone_value ?? null;
+  return { ...t, milestones, total, completedCount, allCompleted, current, previous, max_value };
+}
+
 export default function Missions() {
   const { auth } = useAuth();
   const [data, setData] = useState(null);
@@ -29,29 +41,48 @@ export default function Missions() {
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
-  const load = () =>
+  useEffect(() => {
     fetch('/api/missions', { headers }).then(r => r.json()).then(setData);
+  }, [auth.token]);
 
-  useEffect(() => { load(); }, [auth.token]);
+  const updateTask = (milestoneId, completed) => {
+    setData(prev => {
+      const tasks = prev.tasks.map(t => {
+        if (!t.milestones.some(m => m.id === milestoneId)) return t;
+        const updatedMilestones = t.milestones.map(m =>
+          m.id === milestoneId ? { ...m, completed } : m
+        );
+        return recomputeTask(t, updatedMilestones);
+      });
+      return { ...prev, tasks };
+    });
+  };
 
   const handleComplete = async (milestoneId) => {
     setCompleting(milestoneId);
     await fetch(`/api/missions/${milestoneId}/complete`, { method: 'POST', headers });
-    await load();
+    updateTask(milestoneId, 1);
     setCompleting(null);
   };
 
   const handleUncomplete = async (milestoneId) => {
     setCompleting(milestoneId);
     await fetch(`/api/missions/${milestoneId}/complete`, { method: 'DELETE', headers });
-    await load();
+    updateTask(milestoneId, 0);
     setCompleting(null);
   };
 
   const handleReset = async (albumId) => {
     setResetting(albumId);
     await fetch(`/api/missions/albums/${albumId}/progress`, { method: 'DELETE', headers });
-    await load();
+    setData(prev => {
+      const tasks = prev.tasks.map(t => {
+        if (t.album_id !== albumId) return t;
+        const updatedMilestones = t.milestones.map(m => ({ ...m, completed: 0 }));
+        return recomputeTask(t, updatedMilestones);
+      });
+      return { ...prev, tasks };
+    });
     setResetting(null);
   };
 

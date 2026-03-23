@@ -44,7 +44,7 @@ router.get('/', authMiddleware, (req, res) => {
     const finalMilestone = milestones.find(m => m.is_final_milestone) || milestones[milestones.length - 1];
     const max_value = finalMilestone?.milestone_value ?? null;
 
-    return { album_name, album_id, task, total, completedCount, allCompleted, current, previous, max_value };
+    return { album_name, album_id, task, total, completedCount, allCompleted, current, previous, max_value, milestones };
   });
 
   const albums = Object.entries(albumMap).map(([id, name]) => ({ id: Number(id), name }));
