@@ -11,7 +11,8 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 - **Player profiles** — browse any player's albums and see their inventory read-only, with your own duplicates highlighted
 - **Alliance system** — players belong to alliances; the players list groups by alliance
 - **Roles** — three roles control access: *Admin*, *Stars editor*, and *User*
-- **Admin area** — admins can manage users (name, alliance, password, role) and albums (create, rename, reorder, delete, manage puzzles and piece counts)
+- **Album Missions** — track per-album mission milestones (Rare / Epic / Mythic); mark milestones as completed, step back, reset per album, and toggle visibility of completed missions
+- **Admin area** — admins can manage users (name, alliance, password, role), albums (create, rename, reorder, delete, manage puzzles and piece counts), and mission milestones (add tasks, add/edit/delete milestones per album)
 
 ## Tech Stack
 
