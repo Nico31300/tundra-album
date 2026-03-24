@@ -217,21 +217,27 @@ export default function Navbar() {
             <X size={18} />
           </button>
 
-          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 16 }}>Tundra Albums</div>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 16 }}>Tundra Albums v{version}</div>
 
-          <div style={{ borderTop: '1px solid #334155', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13, color: '#94a3b8' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Version</span>
-              <span style={{ color: '#e2e8f0', fontWeight: 600 }}>{version}</span>
+          <div style={{ borderTop: '1px solid #334155', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13, color: '#94a3b8' }}>
+            <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
+
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.0</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Player page now defaults to a Matches tab - see pieces you can exchange, click to copy message</li>
+                <li>Activity log is now paginated with server-side filters; logs older than 7 days are auto-pruned</li>
+                <li>Activity user filter now lists all users, not just those in the last page</li>
+                <li>Bug fix - removing a duplicate piece is now correctly logged as Removed</li>
+              </ul>
             </div>
 
             <div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, marginBottom: 8 }}>What's new in v{version}</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.2.0</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
-                <li>Activity log — all inventory and admin actions are now tracked</li>
+                <li>Activity log - all inventory and admin actions are now tracked</li>
                 <li>Recent Activity card on the home dashboard with a 24-hour summary</li>
-                <li>Mobile navbar — title replaced by a Home icon, avatar by a Menu icon</li>
-                <li>Minor bug fixes</li>
+                <li>Mobile navbar - title replaced by a Home icon, avatar by a Menu icon</li>
               </ul>
             </div>
 
