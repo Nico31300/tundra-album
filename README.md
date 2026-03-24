@@ -12,6 +12,7 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 - **Alliance system** — players belong to alliances; the players list groups by alliance
 - **Roles** — three roles control access: *Admin*, *Stars editor*, and *User*
 - **Album Missions** — track per-album mission milestones (Rare / Epic / Mythic); mark milestones as completed, step back, reset per album, and toggle visibility of completed missions
+- **Activity log** — all inventory, user, and admin actions are logged; admins can browse the full log with filters by category (Inventory, Users, Admin) and by user; a 24-hour summary card is visible to all users on the home dashboard
 - **Admin area** — admins can manage users (name, alliance, password, role), albums (create, rename, reorder, delete, manage puzzles and piece counts), and mission milestones (add tasks, add/edit/delete milestones per album)
 
 ## Tech Stack
@@ -24,7 +25,7 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 
 ### Installation
 
