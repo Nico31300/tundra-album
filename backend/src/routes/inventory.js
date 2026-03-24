@@ -19,6 +19,8 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
     if (!piece) return res.status(404).json({ error: 'Pièce introuvable' });
 
     const user = db.prepare('SELECT username FROM users WHERE id = ?').get(userId);
+    const existing = db.prepare('SELECT status FROM inventory WHERE user_id = ? AND piece_id = ?').get(userId, pieceId);
+    const prevStatus = existing?.status ?? null;
 
     if (status === null || status === undefined) {
       db.prepare('DELETE FROM inventory WHERE user_id = ? AND piece_id = ?').run(userId, pieceId);
@@ -30,8 +32,15 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(user_id, piece_id) DO UPDATE SET status = excluded.status, updated_at = CURRENT_TIMESTAMP
       `).run(userId, pieceId, status);
-      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_added', ?)`)
-        .run(userId, `${user.username} added ${piece.piece_name} (${piece.puzzle_name})`);
+      // Determine if this is an add or remove based on the transition
+      const isRemove = status === 'need' || (status === 'have' && prevStatus === 'have_duplicate');
+      if (isRemove) {
+        db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_removed', ?)`)
+          .run(userId, `${user.username} removed ${piece.piece_name} (${piece.puzzle_name})`);
+      } else {
+        db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_added', ?)`)
+          .run(userId, `${user.username} added ${piece.piece_name} (${piece.puzzle_name})`);
+      }
     } else {
       return res.status(400).json({ error: 'Status invalide' });
     }

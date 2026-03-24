@@ -3,10 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
 
 const CATEGORY_FILTERS = [
-  { key: 'all',       label: 'All',       actions: null },
-  { key: 'inventory', label: 'Inventory', actions: ['piece_added', 'piece_removed', 'puzzle_completed', 'puzzle_reset', 'album_reset', 'duplicates_cleared'] },
-  { key: 'users',     label: 'Users',     actions: ['user_created', 'user_updated'] },
-  { key: 'admin',     label: 'Admin',     actions: ['album_created', 'album_deleted', 'puzzle_created', 'puzzle_deleted', 'user_deleted', 'admin_user_updated'] },
+  { key: 'all',       label: 'All' },
+  { key: 'inventory', label: 'Inventory' },
+  { key: 'users',     label: 'Users' },
+  { key: 'admin',     label: 'Admin' },
 ];
 
 const ACTION_BADGE = {
@@ -28,26 +28,30 @@ const ACTION_BADGE = {
 
 export default function Activity() {
   const { auth } = useAuth();
-  const [logs, setLogs] = useState(null);
+  const [data, setData] = useState(null);
+  const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    fetch('/api/activity', { headers: { Authorization: `Bearer ${auth.token}` } })
-      .then(r => r.json())
-      .then(setLogs);
+    const headers = { Authorization: `Bearer ${auth.token}` };
+    fetch('/api/activity/users', { headers }).then(r => r.json()).then(setUsers);
   }, [auth.token]);
 
-  const users = logs ? [...new Set(logs.map(l => l.username))].sort() : [];
+  useEffect(() => {
+    setData(null);
+    const headers = { Authorization: `Bearer ${auth.token}` };
+    const params = new URLSearchParams({ page, category: filter });
+    if (userFilter) params.set('username', userFilter);
+    fetch(`/api/activity?${params}`, { headers }).then(r => r.json()).then(setData);
+  }, [auth.token, page, filter, userFilter]);
 
-  const activeCategory = CATEGORY_FILTERS.find(c => c.key === filter);
+  function changeFilter(key) { setFilter(key); setPage(1); }
+  function changeUserFilter(u) { setUserFilter(u); setPage(1); }
 
-  const filtered = logs
-    ? logs.filter(l =>
-        (!activeCategory?.actions || activeCategory.actions.includes(l.action)) &&
-        (userFilter === '' || l.username === userFilter)
-      )
-    : null;
+  const logs = data?.logs ?? null;
+  const pages = data?.pages ?? 1;
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '24px 16px' }}>
@@ -58,7 +62,7 @@ export default function Activity() {
         {CATEGORY_FILTERS.map(c => (
           <button
             key={c.key}
-            onClick={() => setFilter(c.key)}
+            onClick={() => changeFilter(c.key)}
             style={{
               padding: '6px 14px',
               fontSize: 13,
@@ -77,7 +81,7 @@ export default function Activity() {
 
         <select
           value={userFilter}
-          onChange={e => setUserFilter(e.target.value)}
+          onChange={e => changeUserFilter(e.target.value)}
           style={{
             background: '#1e293b',
             border: '1px solid #334155',
@@ -97,11 +101,11 @@ export default function Activity() {
       </div>
 
       {/* Log list */}
-      {!filtered && <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>}
-      {filtered && filtered.length === 0 && (
+      {!logs && <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>}
+      {logs && logs.length === 0 && (
         <div style={{ color: '#475569', fontSize: 14 }}>No activity found.</div>
       )}
-      {filtered && filtered.length > 0 && (
+      {logs && logs.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {/* Desktop header */}
           <div style={{
@@ -121,7 +125,7 @@ export default function Activity() {
             <span>Description</span>
           </div>
 
-          {filtered.map((log, i) => {
+          {logs.map((log, i) => {
             const badge = ACTION_BADGE[log.action] ?? { label: log.action, color: '#94a3b8', bg: 'transparent' };
             return (
               <div
@@ -151,6 +155,35 @@ export default function Activity() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pages > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            style={{
+              padding: '5px 12px', fontSize: 13, borderRadius: 6,
+              border: '1px solid #334155', background: 'transparent',
+              color: page === 1 ? '#334155' : '#94a3b8', cursor: page === 1 ? 'default' : 'pointer',
+            }}
+          >
+            ‹ Prev
+          </button>
+          <span style={{ fontSize: 13, color: '#64748b' }}>Page {page} of {pages}</span>
+          <button
+            onClick={() => setPage(p => Math.min(pages, p + 1))}
+            disabled={page === pages}
+            style={{
+              padding: '5px 12px', fontSize: 13, borderRadius: 6,
+              border: '1px solid #334155', background: 'transparent',
+              color: page === pages ? '#334155' : '#94a3b8', cursor: page === pages ? 'default' : 'pointer',
+            }}
+          >
+            Next ›
+          </button>
         </div>
       )}
     </div>

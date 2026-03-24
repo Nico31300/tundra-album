@@ -94,6 +94,45 @@ router.get('/matches', authMiddleware, (req, res) => {
   res.json({ canReceive, canGive, players });
 });
 
+// GET /api/users/:userId/matches — pieces I can give/receive with a specific player
+router.get('/:userId/matches', authMiddleware, (req, res) => {
+  const { userId } = req.params;
+  const currentUserId = req.user.id;
+
+  const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
+  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+  // Pieces I can give them: I have_duplicate, they need
+  const iCanGive = db.prepare(`
+    SELECT a.id AS album_id, a.name AS album_name, a.position AS album_position,
+           pz.id AS puzzle_id, pz.name AS puzzle_name, pz.position AS puzzle_position,
+           p.id AS piece_id, p.name AS piece_name, p.position AS piece_position, p.stars
+    FROM inventory i_me
+    JOIN inventory i_them ON i_them.piece_id = i_me.piece_id AND i_them.user_id = ? AND i_them.status = 'need'
+    JOIN pieces p ON p.id = i_me.piece_id
+    JOIN puzzles pz ON pz.id = p.puzzle_id
+    JOIN albums a ON a.id = pz.album_id
+    WHERE i_me.user_id = ? AND i_me.status = 'have_duplicate'
+    ORDER BY a.position, pz.position, p.position
+  `).all(userId, currentUserId);
+
+  // Pieces they can give me: they have_duplicate, I need
+  const theyCanGive = db.prepare(`
+    SELECT a.id AS album_id, a.name AS album_name, a.position AS album_position,
+           pz.id AS puzzle_id, pz.name AS puzzle_name, pz.position AS puzzle_position,
+           p.id AS piece_id, p.name AS piece_name, p.position AS piece_position, p.stars
+    FROM inventory i_them
+    JOIN inventory i_me ON i_me.piece_id = i_them.piece_id AND i_me.user_id = ? AND i_me.status = 'need'
+    JOIN pieces p ON p.id = i_them.piece_id
+    JOIN puzzles pz ON pz.id = p.puzzle_id
+    JOIN albums a ON a.id = pz.album_id
+    WHERE i_them.user_id = ? AND i_them.status = 'have_duplicate'
+    ORDER BY a.position, pz.position, p.position
+  `).all(currentUserId, userId);
+
+  res.json({ user, iCanGive, theyCanGive });
+});
+
 // GET /api/users/:userId/albums — albums with target user's inventory stats
 router.get('/:userId/albums', authMiddleware, (req, res) => {
   const { userId } = req.params;
