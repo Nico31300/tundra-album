@@ -18,11 +18,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const isProd = process.env.NODE_ENV === 'production';
 
+/*
 function purgeOldActivityLogs() {
   db.prepare("DELETE FROM activity_logs WHERE created_at < datetime('now', '-7 days')").run();
 }
 purgeOldActivityLogs();
 setInterval(purgeOldActivityLogs, 24 * 60 * 60 * 1000);
+*/
 
 if (!isProd) {
   app.use(cors({ origin: 'http://localhost:5173' }));
