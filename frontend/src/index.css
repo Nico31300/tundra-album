@@ -52,10 +52,22 @@ input:focus { outline: 2px solid #3b82f6; border-color: transparent; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
 }
 
+.navbar-mobile { display: none !important; }
+.navbar-left { flex: 1; }
+.navbar-right { flex: 1; }
+
+@media (max-width: 600px) {
+  .navbar-desktop { display: none !important; }
+  .navbar-mobile { display: flex !important; }
+}
+
 .home-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 200px)); gap: 16px; grid-auto-rows: min-content; }
 @media (max-width: 600px) {
   .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+  .navbar-left, .navbar-right { flex: 0 0 auto; }
+  .navbar-right { margin-left: auto; }
+  .navbar-avatar-btn { background: transparent !important; }
   .activity-header { display: none !important; }
   .activity-row {
     grid-template-columns: 90px 1fr !important;
