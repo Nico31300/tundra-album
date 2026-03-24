@@ -10,6 +10,7 @@ const searchRoutes = require('./routes/search');
 const piecesRoutes = require('./routes/pieces');
 const adminRoutes = require('./routes/admin');
 const missionsRoutes = require('./routes/missions');
+const activityRoutes = require('./routes/activity');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -29,6 +30,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/pieces', piecesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/missions', missionsRoutes);
+app.use('/api/activity', activityRoutes);
 
 if (isProd) {
   const frontendDist = path.join(__dirname, '../../frontend/dist');

@@ -16,6 +16,8 @@ router.post('/register', (req, res) => {
     const result = db.prepare(
       'INSERT INTO users (username, password_hash, alliance) VALUES (?, ?, ?)'
     ).run(username, hash, alliance || null);
+    db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'user_created', ?)`)
+      .run(result.lastInsertRowid, `${username} joined`);
     const token = jwt.sign({ id: result.lastInsertRowid, username, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, username, alliance: alliance || null, role: 'user' });
   } catch (e) {
@@ -45,10 +47,22 @@ router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res
   }
 
   try {
+    const before = db.prepare('SELECT username, alliance FROM users WHERE id = ?').get(userId);
+
     db.prepare('UPDATE users SET username = ?, alliance = ? WHERE id = ?')
       .run(username.trim(), alliance?.trim() || null, userId);
 
     const updated = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?').get(userId);
+
+    if (username.trim() !== before.username) {
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'user_updated', ?)`)
+        .run(userId, `${before.username} changed their username to ${username.trim()}`);
+    }
+    if ((alliance?.trim() || null) !== before.alliance) {
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'user_updated', ?)`)
+        .run(userId, `${updated.username} changed their alliance to ${alliance?.trim() || 'none'}`);
+    }
+
     const token = jwt.sign({ id: updated.id, username: updated.username, role: updated.role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role });
   } catch (e) {

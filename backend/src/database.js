@@ -116,4 +116,14 @@ if (milestoneCount.c === 0) {
   seedAll(MILESTONES);
 }
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS activity_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    action TEXT NOT NULL,
+    label TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
 module.exports = db;

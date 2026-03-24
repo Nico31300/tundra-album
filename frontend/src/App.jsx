@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import Matches from './pages/Matches';
 import Admin from './pages/Admin';
 import Missions from './pages/Missions';
+import Activity from './pages/Activity';
 
 function PrivateRoute({ children }) {
   const { auth } = useAuth();
@@ -23,6 +24,11 @@ function PrivateRoute({ children }) {
 function PublicRoute({ children }) {
   const { auth } = useAuth();
   return auth ? <Navigate to="/" replace /> : children;
+}
+
+function AdminRoute({ children }) {
+  const { auth } = useAuth();
+  return auth?.role === 'admin' ? children : <Navigate to="/" replace />;
 }
 
 export default function App() {
@@ -51,6 +57,7 @@ function AppRoutes() {
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
         <Route path="/missions" element={<PrivateRoute><Missions /></PrivateRoute>} />
+        <Route path="/activity" element={<PrivateRoute><AdminRoute><Activity /></AdminRoute></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />

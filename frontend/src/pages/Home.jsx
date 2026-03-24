@@ -14,6 +14,7 @@ export default function Home() {
   const [users, setUsers] = useState([]);
   const [matches, setMatches] = useState(null);
   const [missions, setMissions] = useState(null);
+  const [activitySummary, setActivitySummary] = useState(null);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -22,6 +23,7 @@ export default function Home() {
     fetch('/api/users', { headers }).then(r => r.json()).then(setUsers);
     fetch('/api/users/matches', { headers }).then(r => r.json()).then(setMatches);
     fetch('/api/missions', { headers }).then(r => r.json()).then(setMissions);
+    fetch('/api/activity/summary', { headers }).then(r => r.json()).then(setActivitySummary);
   }, [auth.token]);
 
   const totalPieces = albums.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0);
@@ -186,6 +188,48 @@ export default function Home() {
               <div style={{ color: '#475569', fontSize: 13 }}>No missions</div>
             );
           })()}
+        </div>
+
+        {/* Admin card — admin only */}
+        {auth.role === 'admin' && (
+          <div
+            className="card"
+            onClick={() => navigate('/admin')}
+            style={cardStyle}
+            onMouseEnter={e => e.currentTarget.style.background = '#263347'}
+            onMouseLeave={e => e.currentTarget.style.background = ''}
+          >
+            <div style={{ fontWeight: 700, fontSize: 16 }}>Admin</div>
+          </div>
+        )}
+
+        {/* Recent Activity card */}
+        <div
+          className="card"
+          onClick={() => auth.role === 'admin' && navigate('/activity')}
+          style={{ ...cardStyle, cursor: auth.role === 'admin' ? 'pointer' : 'default' }}
+          onMouseEnter={e => { if (auth.role === 'admin') e.currentTarget.style.background = '#263347'; }}
+          onMouseLeave={e => { if (auth.role === 'admin') e.currentTarget.style.background = ''; }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Recent Activity</div>
+          <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+            {!activitySummary && <div style={{ color: '#475569' }}>Loading…</div>}
+            {activitySummary && activitySummary.pieces === 0 && activitySummary.newUsers === 0 && (
+              <div style={{ color: '#475569' }}>No activity</div>
+            )}
+            {activitySummary && activitySummary.pieces > 0 && (
+              <>
+                <div style={{ color: '#e2e8f0' }}>{activitySummary.pieces} active user{activitySummary.pieces !== 1 ? 's' : ''}</div>
+                <div style={{ color: '#e2e8f0' }}>{activitySummary.pieceEvents} piece update{activitySummary.pieceEvents !== 1 ? 's' : ''}</div>
+              </>
+            )}
+            {activitySummary && activitySummary.newUsers > 0 && (
+              <div style={{ color: '#a78bfa' }}>
+                {activitySummary.newUsers} new user{activitySummary.newUsers !== 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
+          <div style={{ fontSize: 11, color: '#475569', marginTop: 8, textAlign: 'right' }}>Last 24 hours</div>
         </div>
 
       </div>

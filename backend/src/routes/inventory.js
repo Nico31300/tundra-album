@@ -11,17 +11,27 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
   const userId = req.user.id;
 
   try {
-    const piece = db.prepare('SELECT id FROM pieces WHERE id = ?').get(pieceId);
+    const piece = db.prepare(`
+      SELECT p.id, p.name as piece_name, pz.name as puzzle_name
+      FROM pieces p JOIN puzzles pz ON pz.id = p.puzzle_id
+      WHERE p.id = ?
+    `).get(pieceId);
     if (!piece) return res.status(404).json({ error: 'Pièce introuvable' });
+
+    const user = db.prepare('SELECT username FROM users WHERE id = ?').get(userId);
 
     if (status === null || status === undefined) {
       db.prepare('DELETE FROM inventory WHERE user_id = ? AND piece_id = ?').run(userId, pieceId);
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_removed', ?)`)
+        .run(userId, `${user.username} removed ${piece.piece_name} (${piece.puzzle_name})`);
     } else if (status === 'need' || status === 'have_duplicate' || status === 'have') {
       db.prepare(`
         INSERT INTO inventory (user_id, piece_id, status, updated_at)
         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(user_id, piece_id) DO UPDATE SET status = excluded.status, updated_at = CURRENT_TIMESTAMP
       `).run(userId, pieceId, status);
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_added', ?)`)
+        .run(userId, `${user.username} added ${piece.piece_name} (${piece.puzzle_name})`);
     } else {
       return res.status(400).json({ error: 'Status invalide' });
     }
@@ -39,7 +49,7 @@ router.delete('/album/:albumId', authMiddleware, (req, res) => {
   const userId = req.user.id;
 
   try {
-    const album = db.prepare('SELECT id FROM albums WHERE id = ?').get(albumId);
+    const album = db.prepare('SELECT id, name FROM albums WHERE id = ?').get(albumId);
     if (!album) return res.status(404).json({ error: 'Album introuvable' });
 
     db.prepare(`
@@ -50,6 +60,9 @@ router.delete('/album/:albumId', authMiddleware, (req, res) => {
         WHERE pz.album_id = ?
       )
     `).run(userId, albumId);
+
+    db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'album_reset', ?)`)
+      .run(userId, `${req.user.username} reset album ${album.name}`);
 
     res.json({ albumId: Number(albumId) });
   } catch (e) {
@@ -64,7 +77,7 @@ router.delete('/album/:albumId/duplicates', authMiddleware, (req, res) => {
   const userId = req.user.id;
 
   try {
-    const album = db.prepare('SELECT id FROM albums WHERE id = ?').get(albumId);
+    const album = db.prepare('SELECT id, name FROM albums WHERE id = ?').get(albumId);
     if (!album) return res.status(404).json({ error: 'Album introuvable' });
 
     db.prepare(`
@@ -76,6 +89,9 @@ router.delete('/album/:albumId/duplicates', authMiddleware, (req, res) => {
         WHERE pz.album_id = ?
       )
     `).run(userId, albumId);
+
+    db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'duplicates_cleared', ?)`)
+      .run(userId, `${req.user.username} cleared duplicates for ${album.name}`);
 
     res.json({ albumId: Number(albumId) });
   } catch (e) {
@@ -90,7 +106,7 @@ router.put('/puzzle/:puzzleId/complete', authMiddleware, (req, res) => {
   const userId = req.user.id;
 
   try {
-    const puzzle = db.prepare('SELECT id FROM puzzles WHERE id = ?').get(puzzleId);
+    const puzzle = db.prepare('SELECT id, name FROM puzzles WHERE id = ?').get(puzzleId);
     if (!puzzle) return res.status(404).json({ error: 'Puzzle introuvable' });
 
     const pieces = db.prepare('SELECT id FROM pieces WHERE puzzle_id = ?').all(puzzleId);
@@ -102,6 +118,9 @@ router.put('/puzzle/:puzzleId/complete', authMiddleware, (req, res) => {
         updated_at = CURRENT_TIMESTAMP
     `);
     db.transaction((ps) => { for (const p of ps) upsert.run(userId, p.id); })(pieces);
+
+    db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'puzzle_completed', ?)`)
+      .run(userId, `${req.user.username} completed puzzle ${puzzle.name}`);
 
     res.json({ puzzleId: Number(puzzleId) });
   } catch (e) {
@@ -116,13 +135,16 @@ router.delete('/puzzle/:puzzleId', authMiddleware, (req, res) => {
   const userId = req.user.id;
 
   try {
-    const puzzle = db.prepare('SELECT id FROM puzzles WHERE id = ?').get(puzzleId);
+    const puzzle = db.prepare('SELECT id, name FROM puzzles WHERE id = ?').get(puzzleId);
     if (!puzzle) return res.status(404).json({ error: 'Puzzle introuvable' });
 
     db.prepare(`
       DELETE FROM inventory
       WHERE user_id = ? AND piece_id IN (SELECT id FROM pieces WHERE puzzle_id = ?)
     `).run(userId, puzzleId);
+
+    db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'puzzle_reset', ?)`)
+      .run(userId, `${req.user.username} reset puzzle ${puzzle.name}`);
 
     res.json({ puzzleId: Number(puzzleId) });
   } catch (e) {

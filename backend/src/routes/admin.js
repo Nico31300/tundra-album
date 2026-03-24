@@ -43,6 +43,21 @@ router.put('/users/:id', (req, res) => {
       SELECT u.id, u.username, u.alliance, u.created_at, r.name as role
       FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?
     `).get(id);
+
+    const oldRole = db.prepare('SELECT name FROM roles WHERE id = ?').get(user.role_id)?.name;
+    if (role && roleRow && updated.role !== oldRole) {
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'admin_user_updated', ?)`)
+        .run(req.user.id, `${req.user.username} changed ${updated.username}'s role to ${updated.role}`);
+    }
+    if (alliance !== undefined && (alliance || null) !== user.alliance) {
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'admin_user_updated', ?)`)
+        .run(req.user.id, `${req.user.username} changed ${updated.username}'s alliance to ${alliance || 'none'}`);
+    }
+    if (username && username !== user.username) {
+      db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'admin_user_updated', ?)`)
+        .run(req.user.id, `${req.user.username} renamed ${user.username} to ${updated.username}`);
+    }
+
     res.json(updated);
   } catch (e) {
     if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Nom d\'utilisateur déjà pris' });
@@ -58,8 +73,11 @@ router.delete('/users/:id', (req, res) => {
   const user = db.prepare('SELECT id FROM users WHERE id = ?').get(id);
   if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
+  const target = db.prepare('SELECT username FROM users WHERE id = ?').get(id);
   db.prepare('DELETE FROM inventory WHERE user_id = ?').run(id);
   db.prepare('DELETE FROM users WHERE id = ?').run(id);
+  db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'user_deleted', ?)`)
+    .run(req.user.id, `${req.user.username} deleted user ${target.username}`);
   res.json({ id: Number(id) });
 });
 
@@ -80,6 +98,8 @@ router.post('/albums', (req, res) => {
   const maxPos = db.prepare('SELECT MAX(position) as max FROM albums').get();
   const position = (maxPos.max ?? 0) + 1;
   const result = db.prepare('INSERT INTO albums (name, position) VALUES (?, ?)').run(name.trim(), position);
+  db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'album_created', ?)`)
+    .run(req.user.id, `${req.user.username} created album ${name.trim()}`);
   res.json({ id: result.lastInsertRowid, name: name.trim(), position, puzzles: [] });
 });
 
@@ -112,6 +132,8 @@ router.delete('/albums/:id', (req, res) => {
   db.prepare(`DELETE FROM pieces WHERE puzzle_id IN (SELECT id FROM puzzles WHERE album_id = ?)`).run(id);
   db.prepare('DELETE FROM puzzles WHERE album_id = ?').run(id);
   db.prepare('DELETE FROM albums WHERE id = ?').run(id);
+  db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'album_deleted', ?)`)
+    .run(req.user.id, `${req.user.username} deleted album ${album.name}`);
   res.json({ id: Number(id) });
 });
 
@@ -127,6 +149,9 @@ router.post('/albums/:albumId/puzzles', (req, res) => {
   const maxPos = db.prepare('SELECT MAX(position) as max FROM puzzles WHERE album_id = ?').get(albumId);
   const position = (maxPos.max ?? 0) + 1;
   const result = db.prepare('INSERT INTO puzzles (album_id, name, position) VALUES (?, ?, ?)').run(albumId, name.trim(), position);
+  const albumName = db.prepare('SELECT name FROM albums WHERE id = ?').get(albumId)?.name;
+  db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'puzzle_created', ?)`)
+    .run(req.user.id, `${req.user.username} created puzzle ${name.trim()} in ${albumName}`);
   res.json({ id: result.lastInsertRowid, album_id: Number(albumId), name: name.trim(), position });
 });
 
@@ -199,6 +224,8 @@ router.delete('/puzzles/:id', (req, res) => {
   db.prepare('DELETE FROM inventory WHERE piece_id IN (SELECT id FROM pieces WHERE puzzle_id = ?)').run(id);
   db.prepare('DELETE FROM pieces WHERE puzzle_id = ?').run(id);
   db.prepare('DELETE FROM puzzles WHERE id = ?').run(id);
+  db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'puzzle_deleted', ?)`)
+    .run(req.user.id, `${req.user.username} deleted puzzle ${puzzle.name}`);
   res.json({ id: Number(id) });
 });
 
