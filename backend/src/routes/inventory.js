@@ -33,7 +33,7 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
         ON CONFLICT(user_id, piece_id) DO UPDATE SET status = excluded.status, updated_at = CURRENT_TIMESTAMP
       `).run(userId, pieceId, status);
       // Determine if this is an add or remove based on the transition
-      const isRemove = status === 'need' || (status === 'have' && prevStatus === 'have_duplicate');
+      const isRemove = status === 'have' && prevStatus === 'have_duplicate';
       if (isRemove) {
         db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_removed', ?)`)
           .run(userId, `${user.username} removed ${piece.piece_name} (${piece.puzzle_name})`);

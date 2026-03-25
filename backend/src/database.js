@@ -60,9 +60,10 @@ db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'admin')`).run();
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'stars_editor')`).run();
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (3, 'user')`).run();
 
-try {
+const userCols = db.pragma('table_info(users)');
+if (!userCols.some(col => col.name === 'role_id')) {
   db.prepare(`ALTER TABLE users ADD COLUMN role_id INTEGER NOT NULL DEFAULT 3`).run();
-} catch {}
+}
 
 // Migrate: if mission_milestones still has the old 'atlas' text column, drop and recreate
 const mmCols = db.pragma('table_info(mission_milestones)');

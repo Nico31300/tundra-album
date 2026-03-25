@@ -223,6 +223,15 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.1</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Security fix — server now refuses to start if JWT_SECRET is not set in the environment</li>
+                <li>Activity log pruning re-enabled — logs older than 7 days are correctly auto-purged daily</li>
+                <li>Bug fix — marking a piece as "need" is now correctly logged as Added, not Removed</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.0</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Player page now defaults to a Matches tab - see pieces you can exchange, click to copy message</li>
