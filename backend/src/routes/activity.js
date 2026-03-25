@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/summary', authMiddleware, (req, res) => {
   const pieceRow = db.prepare(`
     SELECT COUNT(DISTINCT user_id) as users, COUNT(*) as events FROM activity_logs
-    WHERE action IN ('piece_added', 'piece_removed', 'duplicates_cleared', 'puzzle_completed', 'puzzle_reset', 'album_reset')
+    WHERE action IN ('piece_added', 'piece_removed', 'piece_looking_for', 'has_duplicate', 'duplicates_cleared', 'puzzle_completed', 'puzzle_reset', 'album_reset')
     AND created_at >= datetime('now', '-24 hours')
   `).get();
   const pieces = pieceRow.users;
@@ -35,7 +35,7 @@ router.get('/users', authMiddleware, requireRole('admin'), (req, res) => {
 });
 
 const CATEGORY_ACTIONS = {
-  inventory: ['piece_added', 'piece_removed', 'puzzle_completed', 'puzzle_reset', 'album_reset', 'duplicates_cleared'],
+  inventory: ['piece_added', 'piece_removed', 'piece_looking_for', 'has_duplicate', 'puzzle_completed', 'puzzle_reset', 'album_reset', 'duplicates_cleared'],
   users:     ['user_created', 'user_updated'],
   admin:     ['album_created', 'album_deleted', 'puzzle_created', 'puzzle_deleted', 'user_deleted', 'admin_user_updated'],
 };

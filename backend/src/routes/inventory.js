@@ -37,9 +37,15 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
       if (isRemove) {
         db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_removed', ?)`)
           .run(userId, `${user.username} removed ${piece.piece_name} (${piece.puzzle_name})`);
+      } else if (status === 'need') {
+        db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_looking_for', ?)`)
+          .run(userId, `${user.username} is looking for ${piece.piece_name} (${piece.puzzle_name})`);
+      } else if (status === 'have_duplicate') {
+        db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'has_duplicate', ?)`)
+          .run(userId, `${user.username} has a duplicate of ${piece.piece_name} (${piece.puzzle_name})`);
       } else {
         db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'piece_added', ?)`)
-          .run(userId, `${user.username} added ${piece.piece_name} (${piece.puzzle_name})`);
+          .run(userId, `${user.username} has ${piece.piece_name} (${piece.puzzle_name})`);
       }
     } else {
       return res.status(400).json({ error: 'Status invalide' });

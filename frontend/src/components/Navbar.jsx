@@ -16,6 +16,7 @@ export default function Navbar() {
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
 
   function handleLogout() {
     logout();
@@ -157,6 +158,19 @@ export default function Navbar() {
                 Settings
               </Link>
               <button
+                onClick={() => { setAvatarOpen(false); setInstallOpen(true); }}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '10px 16px', fontSize: 13,
+                  background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer',
+                  borderTop: '1px solid #334155',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}
+              >
+                Install app
+              </button>
+              <button
                 onClick={() => { setAvatarOpen(false); setAboutOpen(true); }}
                 style={{
                   display: 'block', width: '100%', textAlign: 'left',
@@ -204,6 +218,7 @@ export default function Navbar() {
           style={{
             background: '#1e293b', border: '1px solid #334155', borderRadius: 12,
             width: '100%', maxWidth: 520, padding: 24, position: 'relative',
+            maxHeight: '90vh', display: 'flex', flexDirection: 'column',
           }}
         >
           <button
@@ -219,15 +234,15 @@ export default function Navbar() {
 
           <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 16 }}>Tundra Albums v{version}</div>
 
-          <div style={{ borderTop: '1px solid #334155', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13, color: '#94a3b8' }}>
+          <div style={{ borderTop: '1px solid #334155', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13, color: '#94a3b8', overflowY: 'auto' }}>
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.1</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
-                <li>Security fix — server now refuses to start if JWT_SECRET is not set in the environment</li>
-                <li>Activity log pruning re-enabled — logs older than 7 days are correctly auto-purged daily</li>
-                <li>Bug fix — marking a piece as "need" is now correctly logged as Added, not Removed</li>
+                <li>Security & bug fix</li>
+                <li>Activity log pruning re-enabled - logs older than 7 days are correctly auto-purged daily</li>
+                <li>Progressive Web App - Install Tundra Albums on your phone or desktop via <strong style={{ color: '#e2e8f0' }}>avatar menu → Install app</strong></li>
               </ul>
             </div>
 
@@ -252,6 +267,66 @@ export default function Navbar() {
 
             <div style={{ borderTop: '1px solid #334155', paddingTop: 10, color: '#475569', fontSize: 12 }}>
               © {new Date().getFullYear()} Tundra Albums. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    {/* Install modal */}
+    {installOpen && (
+      <div
+        onClick={() => setInstallOpen(false)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 300,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 16,
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            background: '#1e293b', border: '1px solid #334155', borderRadius: 12,
+            width: '100%', maxWidth: 520, padding: 24, position: 'relative',
+            maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+          }}
+        >
+          <button
+            onClick={() => setInstallOpen(false)}
+            style={{
+              position: 'absolute', top: 12, right: 12,
+              background: 'none', border: 'none', color: '#64748b',
+              cursor: 'pointer', padding: 4, display: 'flex',
+            }}
+          >
+            <X size={18} />
+          </button>
+
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 16 }}>Install the app</div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, fontSize: 13, color: '#94a3b8', overflowY: 'auto' }}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 8, color: '#e2e8f0' }}>Android (Chrome)</div>
+              <ol style={{ paddingLeft: 16, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>Tap the <strong style={{ color: '#e2e8f0' }}>⋮</strong> menu in the top-right corner</li>
+                <li>Select <strong style={{ color: '#e2e8f0' }}>Add to Home screen</strong></li>
+                <li>Confirm by tapping <strong style={{ color: '#e2e8f0' }}>Add</strong></li>
+              </ol>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 8, color: '#e2e8f0' }}>iPhone / iPad (Safari)</div>
+              <ol style={{ paddingLeft: 16, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>Tap the <strong style={{ color: '#e2e8f0' }}>Share</strong> button <strong style={{ color: '#e2e8f0' }}>⎙</strong> at the bottom of the screen</li>
+                <li>Scroll down and tap <strong style={{ color: '#e2e8f0' }}>Add to Home Screen</strong></li>
+                <li>Tap <strong style={{ color: '#e2e8f0' }}>Add</strong> in the top-right corner</li>
+              </ol>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 8, color: '#e2e8f0' }}>Desktop (Chrome / Edge)</div>
+              <ol style={{ paddingLeft: 16, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>Click the <strong style={{ color: '#e2e8f0' }}>install</strong> icon <strong style={{ color: '#e2e8f0' }}>⊕</strong> in the address bar</li>
+                <li>Click <strong style={{ color: '#e2e8f0' }}>Install</strong> in the prompt</li>
+              </ol>
             </div>
           </div>
         </div>

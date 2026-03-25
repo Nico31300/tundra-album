@@ -10,8 +10,10 @@ const CATEGORY_FILTERS = [
 ];
 
 const ACTION_BADGE = {
-  piece_added:        { label: 'Added',     color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
-  piece_removed:      { label: 'Removed',   color: '#f87171', bg: 'rgba(248,113,113,0.12)' },
+  piece_added:        { label: 'Have',         color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
+  piece_removed:      { label: 'Removed',     color: '#f87171', bg: 'rgba(248,113,113,0.12)' },
+  piece_looking_for:  { label: 'Looking for', color: '#facc15', bg: 'rgba(250,204,21,0.12)' },
+  has_duplicate:      { label: 'Duplicate',    color: '#f97316', bg: 'rgba(249,115,22,0.12)' },
   puzzle_completed:   { label: 'Completed', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
   puzzle_reset:       { label: 'Reset',     color: '#fb923c', bg: 'rgba(251,146,60,0.12)' },
   album_reset:        { label: 'Reset',     color: '#fb923c', bg: 'rgba(251,146,60,0.12)' },
