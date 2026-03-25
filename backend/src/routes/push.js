@@ -43,6 +43,15 @@ router.post('/subscribe', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
+// DELETE /api/push/subscribe — remove subscription for current device
+router.delete('/subscribe', authMiddleware, (req, res) => {
+  const { endpoint } = req.body;
+  if (!endpoint) return res.status(400).json({ error: 'Missing endpoint' });
+  db.prepare('DELETE FROM push_subscriptions WHERE user_id = ? AND endpoint = ?')
+    .run(req.user.id, endpoint);
+  res.json({ ok: true });
+});
+
 // POST /api/push/notify/:userId — send push notification to a user
 router.post('/notify/:userId', authMiddleware, (req, res) => {
   const targetUserId = Number(req.params.userId);
