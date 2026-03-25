@@ -13,9 +13,11 @@ router.get('/', authMiddleware, (req, res) => {
     SELECT u.id, u.username, u.alliance,
            SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
            SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate,
-           MAX(i.updated_at) AS last_updated
+           MAX(i.updated_at) AS last_updated,
+           CASE WHEN COUNT(ps.id) > 0 THEN 1 ELSE 0 END AS push_enabled
     FROM users u
     LEFT JOIN inventory i ON i.user_id = u.id
+    LEFT JOIN push_subscriptions ps ON ps.user_id = u.id
     WHERE u.id != ?
     GROUP BY u.id
   `).all(userId);

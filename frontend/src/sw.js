@@ -22,12 +22,21 @@ self.addEventListener('push', event => {
       icon: '/icons/icon.svg',
       badge: '/icons/icon.svg',
       data: { url: data.url },
+    }).then(() => {
+      if ('setAppBadge' in self.navigator) {
+        return self.registration.getNotifications().then(notifications =>
+          self.navigator.setAppBadge(notifications.length)
+        );
+      }
     })
   );
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
+  if ('clearAppBadge' in self.navigator) {
+    self.navigator.clearAppBadge();
+  }
   const url = event.notification.data?.url;
   if (url) {
     event.waitUntil(clients.openWindow(url));

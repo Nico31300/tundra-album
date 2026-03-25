@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Bell } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
 
@@ -83,18 +84,23 @@ function AllianceGroups({ users }) {
 
 function UserList({ users, showAlliance = false }) {
   return (
-    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 13 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, fontSize: 13 }}>
       {users.map(user => (
-        <Link key={user.id} to={`/players/${user.id}`}>
+        <Link key={user.id} to={`/players/${user.id}`} style={{ display: 'flex' }}>
           <div
-            style={{ background: '#1e293b', borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}
+            style={{ background: '#1e293b', borderRadius: 8, padding: '10px 14px', cursor: 'pointer', flex: 1, display: 'flex', flexDirection: 'column' }}
             onMouseEnter={e => e.currentTarget.style.background = '#263347'}
             onMouseLeave={e => e.currentTarget.style.background = '#1e293b'}
           >
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>
-              {user.username}
-              {showAlliance && user.alliance && (
-                <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{user.alliance}]</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, gap: 6 }}>
+              <div style={{ fontWeight: 600 }}>
+                {user.username}
+                {showAlliance && user.alliance && (
+                  <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{user.alliance}]</span>
+                )}
+              </div>
+              {user.push_enabled === 1 && (
+                <Bell size={12} style={{ color: '#60a5fa', flexShrink: 0, marginTop: 2 }} />
               )}
             </div>
             {user.have_duplicate > 0 && (
@@ -107,7 +113,7 @@ function UserList({ users, showAlliance = false }) {
               <div style={{ color: '#475569' }}>No activity</div>
             )}
             {user.last_updated && (
-              <div style={{ color: '#475569', fontSize: 11, marginTop: 4 }}>
+              <div style={{ color: '#475569', fontSize: 11, marginTop: 'auto', paddingTop: 6, textAlign: 'right' }}>
                 Updated {formatRelative(user.last_updated)}
               </div>
             )}

@@ -183,10 +183,10 @@ function PieceTile({ piece, onClick, copied }) {
   );
 }
 
-function MatchSection({ title, color, albums, username, messageIntro, targetUserId, token }) {
+function MatchSection({ title, color, albums, username, messageIntro, targetUserId, token, section }) {
   const [copiedId, setCopiedId] = useState(null);
 
-  function handlePieceClick(piece) {
+  function handlePieceClick(piece, albumName) {
     const text = buildMatchMessage(username, messageIntro, [piece]);
     navigator.clipboard.writeText(text);
     setCopiedId(piece.piece_id);
@@ -195,7 +195,7 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
     fetch(`/api/push/notify/${targetUserId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ pieceName: piece.piece_name, puzzleName: piece.puzzle_name }),
+      body: JSON.stringify({ pieceName: piece.piece_name, puzzleName: piece.puzzle_name, albumName, section }),
     });
   }
 
@@ -221,7 +221,7 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
                         key={piece.piece_id}
                         piece={piece}
                         copied={copiedId === piece.piece_id}
-                        onClick={() => handlePieceClick(piece)}
+                        onClick={() => handlePieceClick(piece, album.album_name)}
                       />
                     ))}
                   </div>
@@ -251,6 +251,7 @@ function MatchesView({ matches, username, targetUserId, token }) {
         messageIntro="I'm looking for a puzzle piece:"
         targetUserId={targetUserId}
         token={token}
+        section="theyCanGive"
       />
       <MatchSection
         title={`I can give ${username}`}
@@ -260,6 +261,7 @@ function MatchesView({ matches, username, targetUserId, token }) {
         messageIntro="Got a puzzle piece you might need:"
         targetUserId={targetUserId}
         token={token}
+        section="iCanGive"
       />
     </div>
   );
