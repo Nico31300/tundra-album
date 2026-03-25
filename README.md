@@ -14,6 +14,8 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 - **Album Missions** — track per-album mission milestones (Rare / Epic / Mythic); mark milestones as completed, step back, reset per album, and toggle visibility of completed missions
 - **Activity log** — all inventory, user, and admin actions are logged; admins can browse the paginated log (20 per page) with filters by category and user (all users shown, not just recent); logs older than 7 days are automatically pruned; a 24-hour summary card is visible to all users on the home dashboard
 - **Admin area** — admins can manage users (name, alliance, password, role), albums (create, rename, reorder, delete, manage puzzles and piece counts), and mission milestones (add tasks, add/edit/delete milestones per album)
+- **Progressive Web App** — installable on Android, iOS, and desktop; works offline for cached pages; install via *avatar menu → Install app*
+- **Push notifications** — players receive a browser push notification when someone clicks a piece on their player page
 
 ## Tech Stack
 
@@ -25,7 +27,7 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 
 ### Installation
 

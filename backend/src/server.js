@@ -11,6 +11,7 @@ const piecesRoutes = require('./routes/pieces');
 const adminRoutes = require('./routes/admin');
 const missionsRoutes = require('./routes/missions');
 const activityRoutes = require('./routes/activity');
+const pushRoutes = require('./routes/push');
 
 const db = require('./database');
 
@@ -39,6 +40,7 @@ app.use('/api/pieces', piecesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/missions', missionsRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/push', pushRoutes);
 
 if (isProd) {
   const frontendDist = path.join(__dirname, '../../frontend/dist');

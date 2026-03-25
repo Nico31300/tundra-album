@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { subscribeToPush } from './utils/pushNotifications';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Login from './pages/Login';
@@ -41,6 +43,11 @@ export default function App() {
 
 function AppRoutes() {
   const { auth } = useAuth();
+
+  useEffect(() => {
+    if (auth) subscribeToPush(auth.token);
+  }, [auth?.token]);
+
   return (
     <>
       {auth && <Navbar />}

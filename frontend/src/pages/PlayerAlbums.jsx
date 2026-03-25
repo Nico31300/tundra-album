@@ -110,7 +110,7 @@ export default function PlayerAlbums() {
       )}
 
       {view === 'matches' && (
-        <MatchesView matches={matches} username={user.username} />
+        <MatchesView matches={matches} username={user.username} targetUserId={userId} token={auth.token} />
       )}
     </div>
   );
@@ -183,7 +183,7 @@ function PieceTile({ piece, onClick, copied }) {
   );
 }
 
-function MatchSection({ title, color, albums, username, messageIntro }) {
+function MatchSection({ title, color, albums, username, messageIntro, targetUserId, token }) {
   const [copiedId, setCopiedId] = useState(null);
 
   function handlePieceClick(piece) {
@@ -191,6 +191,12 @@ function MatchSection({ title, color, albums, username, messageIntro }) {
     navigator.clipboard.writeText(text);
     setCopiedId(piece.piece_id);
     setTimeout(() => setCopiedId(null), 300);
+
+    fetch(`/api/push/notify/${targetUserId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ pieceName: piece.piece_name, puzzleName: piece.puzzle_name }),
+    });
   }
 
   return (
@@ -229,7 +235,7 @@ function MatchSection({ title, color, albums, username, messageIntro }) {
   );
 }
 
-function MatchesView({ matches, username }) {
+function MatchesView({ matches, username, targetUserId, token }) {
   if (!matches) return <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>;
 
   const iCanGiveAlbums = groupByAlbumPuzzle(matches.iCanGive);
@@ -243,6 +249,8 @@ function MatchesView({ matches, username }) {
         albums={theyCanGiveAlbums}
         username={username}
         messageIntro="I'm looking for a puzzle piece:"
+        targetUserId={targetUserId}
+        token={token}
       />
       <MatchSection
         title={`I can give ${username}`}
@@ -250,6 +258,8 @@ function MatchesView({ matches, username }) {
         albums={iCanGiveAlbums}
         username={username}
         messageIntro="Got a puzzle piece you might need:"
+        targetUserId={targetUserId}
+        token={token}
       />
     </div>
   );
