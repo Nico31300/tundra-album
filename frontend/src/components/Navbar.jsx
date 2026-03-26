@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { version } from '../../package.json';
 import { Home, Menu, X } from 'lucide-react';
 
@@ -12,6 +12,8 @@ export default function Navbar() {
   const [results, setResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef(null);
+
+  const location = useLocation();
 
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef(null);
@@ -74,10 +76,10 @@ export default function Navbar() {
     }}>
       {/* Left */}
       <div className="navbar-left" style={{ display: 'flex', alignItems: 'center' }}>
-        <Link to="/" className="navbar-desktop" style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', color: '#e2e8f0' }}>
+        <Link to="/" onClick={() => location.pathname === '/' && window.dispatchEvent(new Event('home-refresh'))} className="navbar-desktop" style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', color: '#e2e8f0' }}>
           Tundra Albums
         </Link>
-        <Link to="/" className="navbar-mobile" style={{ color: '#e2e8f0', display: 'flex', alignItems: 'center', padding: 4 }}>
+        <Link to="/" onClick={() => location.pathname === '/' && window.dispatchEvent(new Event('home-refresh'))} className="navbar-mobile" style={{ color: '#e2e8f0', display: 'flex', alignItems: 'center', padding: 4 }}>
           <Home size={22} />
         </Link>
       </div>

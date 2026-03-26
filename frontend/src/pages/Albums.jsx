@@ -7,9 +7,18 @@ const STATUS_COLORS = {
   have_duplicate: '#22c55e',
 };
 
+function SkeletonCard() {
+  return (
+    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="skeleton" style={{ height: 14, width: '60%' }} />
+      <div className="skeleton" style={{ height: 12, width: '40%' }} />
+    </div>
+  );
+}
+
 export default function Albums() {
   const { auth } = useAuth();
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState(null);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
 
@@ -21,7 +30,8 @@ export default function Albums() {
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ marginBottom: 20 }}>My Albums</h2>
       <div className="grid-3" style={{ gridAutoRows: '1fr' }}>
-        {albums.map(album => {
+        {albums === null && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        {albums?.map(album => {
           const allDone = album.stats?.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
           const owned = (album.stats?.have ?? 0) + (album.stats?.have_duplicate ?? 0);
           return (
@@ -79,3 +89,4 @@ export default function Albums() {
     </div>
   );
 }
+

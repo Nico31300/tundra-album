@@ -157,8 +157,17 @@ export default function Matches() {
 
   if (!data) {
     return (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px', color: '#64748b' }}>
-        Loading…
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
+        <h2 style={{ marginBottom: 24 }}>My Matches</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div className="skeleton" style={{ height: 14, width: '30%' }} />
+              <div className="skeleton" style={{ height: 12, width: '60%' }} />
+              <div className="skeleton" style={{ height: 12, width: '50%' }} />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

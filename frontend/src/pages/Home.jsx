@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+function Skeleton() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="skeleton" style={{ height: 12, width: '70%' }} />
+      <div className="skeleton" style={{ height: 12, width: '50%' }} />
+    </div>
+  );
+}
+
 const STATUS_COLORS = {
   need: '#f59e0b',
   have_duplicate: '#22c55e',
@@ -10,13 +19,27 @@ const STATUS_COLORS = {
 export default function Home() {
   const { auth } = useAuth();
   const navigate = useNavigate();
-  const [albums, setAlbums] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [albums, setAlbums] = useState(null);
+  const [users, setUsers] = useState(null);
   const [matches, setMatches] = useState(null);
   const [missions, setMissions] = useState(null);
   const [activitySummary, setActivitySummary] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
+
+  useEffect(() => {
+    const handler = () => {
+      setAlbums(null);
+      setUsers(null);
+      setMatches(null);
+      setMissions(null);
+      setActivitySummary(null);
+      setRefreshKey(k => k + 1);
+    };
+    window.addEventListener('home-refresh', handler);
+    return () => window.removeEventListener('home-refresh', handler);
+  }, []);
 
   useEffect(() => {
     fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
@@ -24,17 +47,17 @@ export default function Home() {
     fetch('/api/users/matches', { headers }).then(r => r.json()).then(setMatches);
     fetch('/api/missions', { headers }).then(r => r.json()).then(setMissions);
     fetch('/api/activity/summary', { headers }).then(r => r.json()).then(setActivitySummary);
-  }, [auth.token]);
+  }, [auth.token, refreshKey]);
 
-  const totalPieces = albums.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0);
-  const totalOwned = albums.reduce((sum, a) => sum + (a.stats?.have ?? 0) + (a.stats?.have_duplicate ?? 0), 0);
-  const totalNeed = albums.reduce((sum, a) => sum + (a.stats?.need ?? 0), 0);
-  const totalDuplicates = albums.reduce((sum, a) => sum + (a.stats?.have_duplicate ?? 0), 0);
+  const totalPieces = albums?.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0) ?? 0;
+  const totalOwned = albums?.reduce((sum, a) => sum + (a.stats?.have ?? 0) + (a.stats?.have_duplicate ?? 0), 0) ?? 0;
+  const totalNeed = albums?.reduce((sum, a) => sum + (a.stats?.need ?? 0), 0) ?? 0;
+  const totalDuplicates = albums?.reduce((sum, a) => sum + (a.stats?.have_duplicate ?? 0), 0) ?? 0;
   const progressPct = totalPieces > 0 ? Math.round((totalOwned / totalPieces) * 100) : 0;
 
-  const totalPlayers = users.length;
-  const playersNeed = users.reduce((sum, u) => sum + (u.need ?? 0), 0);
-  const playersOffering = users.reduce((sum, u) => sum + (u.have_duplicate ?? 0), 0);
+  const totalPlayers = users?.length ?? 0;
+  const playersNeed = users?.reduce((sum, u) => sum + (u.need ?? 0), 0) ?? 0;
+  const playersOffering = users?.reduce((sum, u) => sum + (u.have_duplicate ?? 0), 0) ?? 0;
 
   const cardStyle = {
     cursor: 'pointer',
@@ -57,15 +80,11 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Albums</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {totalNeed > 0 && (
-              <div style={{ color: STATUS_COLORS.need }}>Looking for: {totalNeed}</div>
-            )}
-            {totalDuplicates > 0 && (
-              <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicates: {totalDuplicates}</div>
-            )}
-            {totalNeed === 0 && totalDuplicates === 0 && (
-              <div style={{ color: '#475569' }}>No active pieces</div>
-            )}
+            {albums === null ? <Skeleton /> : <>
+              {totalNeed > 0 && <div style={{ color: STATUS_COLORS.need }}>Looking for: {totalNeed}</div>}
+              {totalDuplicates > 0 && <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicates: {totalDuplicates}</div>}
+              {totalNeed === 0 && totalDuplicates === 0 && <div style={{ color: '#475569' }}>No active pieces</div>}
+            </>}
           </div>
           {totalPieces > 0 && (
             <div style={{ marginTop: 16 }}>
@@ -101,16 +120,12 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Players</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ color: '#e2e8f0' }}>Players: {totalPlayers}</div>
-            {playersNeed > 0 && (
-              <div style={{ color: STATUS_COLORS.need }}>Looking for: {playersNeed}</div>
-            )}
-            {playersOffering > 0 && (
-              <div style={{ color: STATUS_COLORS.have_duplicate }}>Offering: {playersOffering}</div>
-            )}
-            {playersNeed === 0 && playersOffering === 0 && (
-              <div style={{ color: '#475569' }}>No active trades</div>
-            )}
+            {users === null ? <Skeleton /> : <>
+              <div style={{ color: '#e2e8f0' }}>Players: {totalPlayers}</div>
+              {playersNeed > 0 && <div style={{ color: STATUS_COLORS.need }}>Looking for: {playersNeed}</div>}
+              {playersOffering > 0 && <div style={{ color: STATUS_COLORS.have_duplicate }}>Offering: {playersOffering}</div>}
+              {playersNeed === 0 && playersOffering === 0 && <div style={{ color: '#475569' }}>No active trades</div>}
+            </>}
           </div>
         </div>
 
@@ -124,7 +139,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Matches</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {!matches && <div style={{ color: '#475569' }}>Loading…</div>}
+            {!matches && <Skeleton />}
             {matches && matches.players.length === 0 && (
               <div style={{ color: '#475569' }}>No matches yet</div>
             )}
@@ -157,7 +172,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Missions</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {!missions && <div style={{ color: '#475569' }}>Loading…</div>}
+            {!missions && <Skeleton />}
           </div>
           {missions && (() => {
             const total = missions.tasks.length;
@@ -213,7 +228,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Recent Activity</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {!activitySummary && <div style={{ color: '#475569' }}>Loading…</div>}
+            {!activitySummary && <Skeleton />}
             {activitySummary && activitySummary.pieces === 0 && activitySummary.newUsers === 0 && (
               <div style={{ color: '#475569' }}>No activity</div>
             )}

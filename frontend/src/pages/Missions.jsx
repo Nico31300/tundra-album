@@ -146,7 +146,19 @@ export default function Missions() {
 
       </div>
 
-      {!data && <div style={{ color: '#475569', fontSize: 13 }}>Loading…</div>}
+      {!data && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '10px 14px' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div className="skeleton" style={{ height: 13, width: '55%' }} />
+                <div className="skeleton" style={{ height: 11, width: '25%' }} />
+              </div>
+              <div className="skeleton" style={{ height: 28, width: 80, borderRadius: 6 }} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {data && visibleTasks.length === 0 && (
         <div style={{ color: '#475569', fontSize: 13 }}>No missions to show.</div>

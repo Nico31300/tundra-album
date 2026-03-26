@@ -39,7 +39,7 @@ export default function Admin() {
 function UsersTab() {
   const { auth } = useAuth();
   const headers = { Authorization: `Bearer ${auth.token}`, 'Content-Type': 'application/json' };
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState(null);
   const [editUser, setEditUser] = useState(null); // user being edited
   const [form, setForm] = useState({});
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -160,7 +160,16 @@ function UsersTab() {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {users === null && Array.from({ length: 4 }).map((_, i) => (
+              <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}>
+                {[60, 50, 40, 50, 80].map((w, j) => (
+                  <td key={j} style={{ padding: '10px 12px' }}>
+                    <div className="skeleton" style={{ height: 12, width: `${w}%` }} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+            {users?.map(user => (
               <tr key={user.id} style={{ borderBottom: '1px solid #1e293b' }}>
                 <td style={{ padding: '10px 12px', fontWeight: 600 }}>{user.username}</td>
                 <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{user.alliance || '—'}</td>
@@ -201,7 +210,7 @@ function UsersTab() {
 function AlbumsTab() {
   const { auth } = useAuth();
   const headers = { Authorization: `Bearer ${auth.token}`, 'Content-Type': 'application/json' };
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState(null);
   const [editAlbum, setEditAlbum] = useState(null);
   const [form, setForm] = useState({});
   const [newName, setNewName] = useState('');
@@ -310,7 +319,13 @@ function AlbumsTab() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {albums.map(album => (
+        {albums === null && Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="skeleton" style={{ height: 12, width: 24 }} />
+            <div className="skeleton" style={{ height: 13, width: '40%' }} />
+          </div>
+        ))}
+        {albums?.map(album => (
           <div key={album.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
               <span style={{ color: '#475569', fontSize: 12, minWidth: 28 }}>#{album.position}</span>
@@ -506,7 +521,7 @@ function MissionsTab() {
   const { auth } = useAuth();
   const headers = { Authorization: `Bearer ${auth.token}`, 'Content-Type': 'application/json' };
   const [milestones, setMilestones] = useState([]);
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState(null);
   const [expandedAlbum, setExpandedAlbum] = useState(null);
   const [modal, setModal] = useState(null); // { mode: 'add'|'edit', albumId?, task?, milestone? }
   const [form, setForm] = useState({});
@@ -645,7 +660,12 @@ function MissionsTab() {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {albums.map(album => {
+        {albums === null && Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="skeleton" style={{ height: 13, width: '35%' }} />
+          </div>
+        ))}
+        {albums?.map(album => {
           const albumData = grouped[album.id];
           const taskCount = albumData ? Object.keys(albumData.tasks).length : 0;
           const msCount = albumData ? Object.values(albumData.tasks).reduce((s, ms) => s + ms.length, 0) : 0;

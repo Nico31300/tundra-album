@@ -103,7 +103,26 @@ export default function Activity() {
       </div>
 
       {/* Log list */}
-      {!logs && <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>}
+      {!logs && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} style={{
+              display: 'grid',
+              gridTemplateColumns: '90px 110px 90px 1fr',
+              padding: '10px 12px',
+              borderBottom: '1px solid #1e293b',
+              background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
+              gap: 8,
+              alignItems: 'center',
+            }}>
+              <div className="skeleton" style={{ height: 12, width: '80%' }} />
+              <div className="skeleton" style={{ height: 12, width: '70%' }} />
+              <div className="skeleton" style={{ height: 18, width: 60, borderRadius: 4 }} />
+              <div className="skeleton" style={{ height: 12, width: '60%' }} />
+            </div>
+          ))}
+        </div>
+      )}
       {logs && logs.length === 0 && (
         <div style={{ color: '#475569', fontSize: 14 }}>No activity found.</div>
       )}

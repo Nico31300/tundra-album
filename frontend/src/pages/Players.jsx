@@ -9,9 +9,22 @@ const STATUS_COLORS = {
   have_duplicate: '#22c55e',
 };
 
+function SkeletonUserList() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} style={{ background: '#1e293b', borderRadius: 8, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="skeleton" style={{ height: 13, width: '70%' }} />
+          <div className="skeleton" style={{ height: 11, width: '50%' }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Players() {
   const { auth } = useAuth();
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState(null);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
 
   const headers = { Authorization: `Bearer ${auth.token}` };
@@ -21,14 +34,16 @@ export default function Players() {
   }, [auth.token]);
 
   const byRecent = (a, b) => (b.last_updated ?? '').localeCompare(a.last_updated ?? '');
-  const allianceMembers = users.filter(u => u.sameAlliance).sort(byRecent);
-  const otherMembers = users.filter(u => !u.sameAlliance).sort(byRecent);
+  const allianceMembers = users?.filter(u => u.sameAlliance).sort(byRecent) ?? [];
+  const otherMembers = users?.filter(u => !u.sameAlliance).sort(byRecent) ?? [];
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ marginBottom: 20 }}>Players</h2>
 
-      {users.length === 0 && (
+      {users === null && <SkeletonUserList />}
+
+      {users !== null && users.length === 0 && (
         <div style={{ color: '#64748b', fontSize: 14 }}>No players yet.</div>
       )}
 
