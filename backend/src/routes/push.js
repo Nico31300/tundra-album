@@ -55,7 +55,7 @@ router.delete('/subscribe', authMiddleware, (req, res) => {
 // POST /api/push/notify/:userId — send push notification to a user
 router.post('/notify/:userId', authMiddleware, (req, res) => {
   const targetUserId = Number(req.params.userId);
-  const { pieceName, puzzleName, albumName, section } = req.body;
+  const { pieceName, puzzleName, albumName, section, pieceId, puzzleId, albumId } = req.body;
 
   const subscriptions = db.prepare('SELECT * FROM push_subscriptions WHERE user_id = ?').all(targetUserId);
   if (subscriptions.length === 0) return res.json({ ok: true, sent: 0 });
@@ -64,10 +64,14 @@ router.post('/notify/:userId', authMiddleware, (req, res) => {
     ? `${req.user.username} would like to give you ${puzzleName} - ${pieceName}`
     : `${req.user.username} is interested by ${puzzleName} - ${pieceName}`;
 
+  const url = section === 'iCanGive'
+    ? `/players/${req.user.id}?puzzleId=${puzzleId}&id=${pieceId}`
+    : `/albums/${albumId}?puzzleId=${puzzleId}&id=${pieceId}`;
+
   const payload = JSON.stringify({
     title: albumName ?? 'Tundra Albums',
     body,
-    url: '/matches',
+    url,
   });
 
   const sends = subscriptions.map(sub =>

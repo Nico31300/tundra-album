@@ -19,6 +19,7 @@ export default function Album() {
   const { albumId } = useParams();
   const [searchParams] = useSearchParams();
   const highlightedPuzzleId = Number(searchParams.get('puzzleId'));
+  const highlightedPieceId = Number(searchParams.get('id'));
   const { auth } = useAuth();
   const [album, setAlbum] = useState(null);
   const [albums, setAlbums] = useState([]);
@@ -429,6 +430,8 @@ const currentIndex = albums.findIndex(a => a.id === album.id);
                     position: 'relative',
                     opacity: isLoading ? 0.5 : isDisabledMode ? 0.35 : 1,
                     cursor: isDisabledMode ? 'default' : 'pointer',
+                    outline: piece.id === highlightedPieceId ? '2px solid #facc15' : 'none',
+                    outlineOffset: 2,
                   }}
                 >
                   {piece.name}

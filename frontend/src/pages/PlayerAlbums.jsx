@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { CircleChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
@@ -12,7 +12,9 @@ const STATUS_COLORS = {
 export default function PlayerAlbums() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { auth } = useAuth();
+  const highlightedPieceId = Number(searchParams.get('id')) || null;
   const [data, setData] = useState(null);
   const [view, setView] = useState('matches'); // 'albums' | 'matches'
   const [matches, setMatches] = useState(null);
@@ -111,7 +113,7 @@ export default function PlayerAlbums() {
       )}
 
       {view === 'matches' && (
-        <MatchesView matches={matches} username={user.username} targetUserId={userId} token={auth.token} />
+        <MatchesView matches={matches} username={user.username} targetUserId={userId} token={auth.token} highlightedPieceId={highlightedPieceId} />
       )}
     </div>
   );
@@ -184,8 +186,15 @@ function PieceTile({ piece, onClick, copied }) {
   );
 }
 
-function MatchSection({ title, color, albums, username, messageIntro, targetUserId, token, section }) {
+function MatchSection({ title, color, albums, username, messageIntro, targetUserId, token, section, highlightedPieceId }) {
   const [copiedId, setCopiedId] = useState(null);
+  const pieceRefs = useRef({});
+
+  useEffect(() => {
+    if (!highlightedPieceId) return;
+    const el = pieceRefs.current[highlightedPieceId];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlightedPieceId, albums]);
 
   function handlePieceClick(piece, albumName) {
     const text = buildMatchMessage(username, messageIntro, [piece]);
@@ -196,7 +205,15 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
     fetch(`/api/push/notify/${targetUserId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ pieceName: piece.piece_name, puzzleName: piece.puzzle_name, albumName, section }),
+      body: JSON.stringify({
+        pieceName: piece.piece_name,
+        puzzleName: piece.puzzle_name,
+        albumName,
+        section,
+        pieceId: piece.piece_id,
+        puzzleId: piece.puzzle_id,
+        albumId: piece.album_id,
+      }),
     });
   }
 
@@ -218,12 +235,14 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
                   <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>{puzzle.puzzle_name}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {puzzle.pieces.map(piece => (
-                      <PieceTile
-                        key={piece.piece_id}
-                        piece={piece}
-                        copied={copiedId === piece.piece_id}
-                        onClick={() => handlePieceClick(piece, album.album_name)}
-                      />
+                      <div key={piece.piece_id} ref={el => pieceRefs.current[piece.piece_id] = el}
+                        style={{ outline: piece.piece_id === highlightedPieceId ? '2px solid #facc15' : 'none', borderRadius: 6 }}>
+                        <PieceTile
+                          piece={piece}
+                          copied={copiedId === piece.piece_id}
+                          onClick={() => handlePieceClick(piece, album.album_name)}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -236,7 +255,7 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
   );
 }
 
-function MatchesView({ matches, username, targetUserId, token }) {
+function MatchesView({ matches, username, targetUserId, token, highlightedPieceId }) {
   if (!matches) return <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>;
 
   const iCanGiveAlbums = groupByAlbumPuzzle(matches.iCanGive);
@@ -253,6 +272,7 @@ function MatchesView({ matches, username, targetUserId, token }) {
         targetUserId={targetUserId}
         token={token}
         section="theyCanGive"
+        highlightedPieceId={highlightedPieceId}
       />
       <MatchSection
         title={`I can give ${username}`}
@@ -263,6 +283,7 @@ function MatchesView({ matches, username, targetUserId, token }) {
         targetUserId={targetUserId}
         token={token}
         section="iCanGive"
+        highlightedPieceId={highlightedPieceId}
       />
     </div>
   );
