@@ -1,6 +1,14 @@
 # Tundra Album
 
 A collaborative puzzle piece tracker for the game Tundra. Players can mark pieces they are looking for or have as duplicates, and see what other players are offering or need.
+ 
+<table align="center">
+  <tr>
+    <td align="center" valign="top"><b>Home page</b><br><br><img src="https://github.com/user-attachments/assets/abb38f72-f2af-4804-a18d-a4a48325cbb2" width="300"></td>
+    <td align="center" valign="top"><b>My Albums</b><br><br><img src="https://github.com/user-attachments/assets/1ad3dc37-dd41-42bc-ba46-c9a659c6454b" width="300"></td>
+    <td align="center" valign="top"><b>My Matches</b><br><br><img src="https://github.com/user-attachments/assets/df122ef5-221e-4ab2-b903-4dad16634bbc" width="300"></td>
+  </tr>
+</table>
 
 ## Features
 
