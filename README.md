@@ -65,19 +65,7 @@ The frontend proxies API requests to `http://localhost:3001` via Vite config.
 cd backend && npm run seed
 ```
 
-### Run migrations
-
-```bash
-cd backend
-node src/migrate-piece-names.js
-node src/migrate-piece-names-2.js
-node src/migrate-epic-new-world.js
-node src/migrate-call-of-the-stars.js
-node src/migrate-inventory-updated-at.js
-node src/migrate-inventory-have-status.js
-node src/migrate-piece-stars.js
-node src/migrate-roles.js          # adds roles table and promotes user id=1 to admin
-```
+This creates all albums, puzzles, pieces (with star ratings), and an initial **admin** user (`admin` / `admin`).
 
 ## Deployment (Railway)
 
@@ -90,14 +78,6 @@ The app is deployed on Railway with:
 ```bash
 cd frontend && npm run build
 ```
-
-### Run migrations on Railway
-
-```bash
-railway run node backend/src/migrate-<name>.js
-```
-
-> After running `migrate-roles.js`, the user with `id = 1` is promoted to **admin**. They must log out and back in for the new role to take effect.
 
 ### Database backup
 

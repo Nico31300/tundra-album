@@ -4,9 +4,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "JWT_SECRET=coucou nodemon src/server.js",
-    "seed": "node src/seed.js",
-    "migrate:stars": "node src/migrate-piece-stars.js"
+    "dev": "nodemon --env-file=.env src/server.js",
+    "seed": "node src/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
