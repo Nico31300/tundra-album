@@ -36,7 +36,8 @@ router.get('/matches', authMiddleware, (req, res) => {
   // Rows where other users have_duplicate pieces I need
   const canGiveMeRows = db.prepare(`
     SELECT u.id, u.username, u.alliance,
-           p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name
+           p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name,
+           (SELECT MAX(updated_at) FROM inventory WHERE user_id = u.id) AS last_updated
     FROM users u
     JOIN inventory i_other ON i_other.user_id = u.id AND i_other.status = 'have_duplicate'
     JOIN pieces p ON p.id = i_other.piece_id
@@ -49,7 +50,8 @@ router.get('/matches', authMiddleware, (req, res) => {
   // Rows where other users need pieces I have_duplicate
   const iCanGiveRows = db.prepare(`
     SELECT u.id, u.username, u.alliance,
-           p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name
+           p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name,
+           (SELECT MAX(updated_at) FROM inventory WHERE user_id = u.id) AS last_updated
     FROM users u
     JOIN inventory i_other ON i_other.user_id = u.id AND i_other.status = 'need'
     JOIN pieces p ON p.id = i_other.piece_id
@@ -68,6 +70,7 @@ router.get('/matches', authMiddleware, (req, res) => {
         username: row.username,
         alliance: row.alliance,
         sameAlliance: !!(currentUser?.alliance && row.alliance === currentUser.alliance),
+        last_updated: row.last_updated,
         canGiveMe: {},
         iCanGive: {},
       };

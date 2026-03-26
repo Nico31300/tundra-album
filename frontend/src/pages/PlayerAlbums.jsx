@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { CircleChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
@@ -11,6 +11,7 @@ const STATUS_COLORS = {
 
 export default function PlayerAlbums() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const { auth } = useAuth();
   const [data, setData] = useState(null);
   const [view, setView] = useState('matches'); // 'albums' | 'matches'
@@ -32,7 +33,7 @@ export default function PlayerAlbums() {
       <div style={{ marginBottom: 24 }}>
         {/* Line 1: back + tabs */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-          <Link to="/players" style={{ color: '#64748b', display: 'flex', alignItems: 'center', marginRight: 'auto' }}><CircleChevronLeft size={20} /></Link>
+          <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#64748b', display: 'flex', alignItems: 'center', marginRight: 'auto', cursor: 'pointer', padding: 0 }}><CircleChevronLeft size={20} /></button>
           <div style={{ display: 'flex', gap: 6 }}>
             {['matches', 'albums'].map(v => (
               <button

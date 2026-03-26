@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { formatRelative } from '../utils/formatRelative';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
@@ -97,69 +99,153 @@ function CopyButton({ text }) {
   );
 }
 
-function PlayerCard({ player, showAlliance }) {
-  const hasCanGive = Object.keys(player.canGiveMe).length > 0;
-  const hasICanGive = Object.keys(player.iCanGive).length > 0;
+function filterPuzzles(map, q) {
+  if (!q) return map;
+  const lower = q.toLowerCase();
+  return Object.fromEntries(
+    Object.entries(map).filter(([key]) => key.toLowerCase().includes(lower))
+  );
+}
+
+function countPieces(map) {
+  return Object.values(map).flat().length;
+}
+
+function PlayerCard({ player, showAlliance, searchQuery, sortBy }) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const filteredCanGiveMe = filterPuzzles(player.canGiveMe, searchQuery);
+  const filteredICanGive  = filterPuzzles(player.iCanGive,  searchQuery);
+  const hasCanGive = Object.keys(filteredCanGiveMe).length > 0;
+  const hasICanGive = Object.keys(filteredICanGive).length > 0;
+  const isMutual = Object.keys(player.canGiveMe).length > 0 && Object.keys(player.iCanGive).length > 0;
+  const totalPieces = countPieces(player.canGiveMe) + countPieces(player.iCanGive);
 
   return (
-    <div className="card" style={{ fontSize: 13 }}>
-      <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 10 }}>
-        <Link to={`/players/${player.id}`} style={{ color: '#e2e8f0' }}
-          onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
-          onMouseLeave={e => e.currentTarget.style.color = '#e2e8f0'}
-        >
-          {player.username}
-        </Link>
-        {showAlliance && player.alliance && (
-          <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{player.alliance}]</span>
+    <div
+      className="card"
+      style={{
+        fontSize: 13,
+        borderColor: isMutual ? 'rgba(59,130,246,0.5)' : 'transparent',
+      }}
+    >
+      {/* Card header — always visible, click to collapse */}
+      <div
+        style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: collapsed ? 0 : 10 }}
+        onClick={() => setCollapsed(v => !v)}
+      >
+        <div style={{ flex: 1, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <Link
+            to={`/players/${player.id}`}
+            style={{ color: '#e2e8f0' }}
+            onClick={e => e.stopPropagation()}
+            onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
+            onMouseLeave={e => e.currentTarget.style.color = '#e2e8f0'}
+          >
+            {player.username}
+          </Link>
+          {showAlliance && player.alliance && (
+            <span style={{ color: '#64748b', fontWeight: 400 }}>[{player.alliance}]</span>
+          )}
+          {isMutual && (
+            <span style={{
+              fontSize: 11, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+              background: 'rgba(59,130,246,0.15)', color: '#60a5fa',
+            }}>
+              mutual
+            </span>
+          )}
+        </div>
+        <span style={{ color: '#475569', fontSize: 12, flexShrink: 0 }}>{totalPieces} piece{totalPieces !== 1 ? 's' : ''}</span>
+        {player.last_updated && (
+          <span style={{ color: '#334155', fontSize: 11, flexShrink: 0 }}>· {formatRelative(player.last_updated)}</span>
         )}
+        <span style={{ color: '#475569', fontSize: 12 }}>{collapsed ? '▼' : '▲'}</span>
       </div>
 
-      {hasCanGive && (
-        <div style={{ marginBottom: hasICanGive ? 10 : 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{ color: STATUS_COLORS.have_duplicate }}>Can give you:</span>
-            <CopyButton text={buildCanGiveText(player.username, player.canGiveMe)} />
-          </div>
-          <div style={{ paddingLeft: 8, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {Object.entries(player.canGiveMe).map(([puzzle, pieces]) => (
-              <div key={puzzle}>
-                <span style={{ color: '#e2e8f0' }}>{puzzle}:</span> {[...pieces].sort((a, b) => { const na = Number(a), nb = Number(b); return !isNaN(na) && !isNaN(nb) ? na - nb : a.localeCompare(b); }).join(', ')}
+      {!collapsed && (
+        <>
+          {hasCanGive && sortBy !== 'needs' && (
+            <div style={{ marginBottom: hasICanGive && sortBy !== 'can_give' ? 10 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ color: STATUS_COLORS.have_duplicate }}>Can give you:</span>
+                <CopyButton text={buildCanGiveText(player.username, filteredCanGiveMe)} />
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+              <div style={{ paddingLeft: 8, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {Object.entries(filteredCanGiveMe).map(([puzzle, pieces]) => (
+                  <div key={puzzle}>
+                    <span style={{ color: '#e2e8f0' }}>{puzzle}:</span>{' '}
+                    {[...pieces].sort((a, b) => { const na = Number(a), nb = Number(b); return !isNaN(na) && !isNaN(nb) ? na - nb : a.localeCompare(b); }).join(', ')}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {hasICanGive && (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{ color: STATUS_COLORS.need }}>Needs from you:</span>
-            <CopyButton text={buildNeedsText(player.username, player.iCanGive)} />
-          </div>
-          <div style={{ paddingLeft: 8, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {Object.entries(player.iCanGive).map(([puzzle, pieces]) => (
-              <div key={puzzle}>
-                <span style={{ color: '#e2e8f0' }}>{puzzle}:</span> {[...pieces].sort((a, b) => { const na = Number(a), nb = Number(b); return !isNaN(na) && !isNaN(nb) ? na - nb : a.localeCompare(b); }).join(', ')}
+          {hasICanGive && sortBy !== 'can_give' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ color: STATUS_COLORS.need }}>Needs from you:</span>
+                <CopyButton text={buildNeedsText(player.username, filteredICanGive)} />
               </div>
-            ))}
-          </div>
-        </div>
+              <div style={{ paddingLeft: 8, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {Object.entries(filteredICanGive).map(([puzzle, pieces]) => (
+                  <div key={puzzle}>
+                    <span style={{ color: '#e2e8f0' }}>{puzzle}:</span>{' '}
+                    {[...pieces].sort((a, b) => { const na = Number(a), nb = Number(b); return !isNaN(na) && !isNaN(nb) ? na - nb : a.localeCompare(b); }).join(', ')}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!hasCanGive && !hasICanGive && searchQuery && (
+            <div style={{ color: '#475569' }}>No matching puzzles.</div>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+function sortPlayers(players, sortBy) {
+  const byRecent = (a, b) => (b.last_updated ?? '').localeCompare(a.last_updated ?? '');
+  const copy = [...players];
+  if (sortBy === 'can_give') {
+    return copy.filter(p => Object.keys(p.canGiveMe).length > 0).sort(byRecent);
+  } else if (sortBy === 'needs') {
+    return copy.filter(p => Object.keys(p.iCanGive).length > 0).sort(byRecent);
+  } else {
+    // alliance-first: sort by most recently updated within each group
+    return copy.sort(byRecent);
+  }
+}
+
+function playerMatchesSearch(player, q) {
+  if (!q) return true;
+  const lower = q.toLowerCase();
+  return (
+    Object.keys(player.canGiveMe).some(k => k.toLowerCase().includes(lower)) ||
+    Object.keys(player.iCanGive).some(k => k.toLowerCase().includes(lower))
   );
 }
 
 export default function Matches() {
   const { auth } = useAuth();
   const [data, setData] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('alliance');
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setData(null);
     fetch('/api/users/matches', {
       headers: { Authorization: `Bearer ${auth.token}` },
     }).then(r => r.json()).then(setData);
-  }, [auth.token]);
+  }, [auth.token, refreshKey]);
+
+  useEffect(() => { load(); }, [load]);
 
   if (!data) {
     return (
@@ -178,61 +264,125 @@ export default function Matches() {
     );
   }
 
-  const alliancePlayers = data.players.filter(p => p.sameAlliance);
-  const otherPlayers = data.players.filter(p => !p.sameAlliance);
+  const allPlayers = data.players;
+  const filtered = allPlayers.filter(p => playerMatchesSearch(p, searchQuery));
+
+  const alliancePlayers = sortPlayers(filtered.filter(p => p.sameAlliance), sortBy);
+  const otherPlayers    = sortPlayers(filtered.filter(p => !p.sameAlliance), sortBy);
+  const flatPlayers     = sortPlayers(filtered, sortBy);
+
+  const useFlat = sortBy === 'can_give' || sortBy === 'needs';
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 24 }}>
-        <h2>My Matches</h2>
-        <div style={{ fontSize: 13, color: '#64748b', display: 'flex', gap: 16 }}>
-          {data.canReceive > 0 && (
-            <span style={{ color: STATUS_COLORS.have_duplicate }}>
-              Can receive: {data.canReceive}
-            </span>
-          )}
-          {data.canGive > 0 && (
-            <span style={{ color: STATUS_COLORS.need }}>
-              Can give: {data.canGive}
-            </span>
-          )}
-        </div>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        <h2 style={{ margin: 0 }}>My Matches</h2>
+        <button
+          onClick={() => setRefreshKey(k => k + 1)}
+          title="Refresh"
+          style={{
+            marginLeft: 'auto', background: 'none', border: '1px solid #334155',
+            borderRadius: 6, color: '#64748b', cursor: 'pointer',
+            padding: '5px 8px', display: 'flex', alignItems: 'center',
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = '#e2e8f0'}
+          onMouseLeave={e => e.currentTarget.style.color = '#64748b'}
+        >
+          <RefreshCw size={14} />
+        </button>
       </div>
 
-      {data.players.length === 0 && (
-        <div style={{ color: '#64748b', fontSize: 14 }}>No matches found.</div>
+      {/* Controls */}
+      {allPlayers.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Filter by puzzle name…"
+            style={{ flex: 1, minWidth: 180, padding: '6px 12px', fontSize: 13 }}
+          />
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            style={{
+              background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
+              color: '#e2e8f0', padding: '6px 10px', fontSize: 13, cursor: 'pointer',
+            }}
+          >
+            <option value="alliance">Alliance first</option>
+            <option value="can_give">Can give you</option>
+            <option value="needs">Needs from you</option>
+          </select>
+        </div>
       )}
 
-      {alliancePlayers.length > 0 && (
-        <>
-          <h4 style={{ marginBottom: 12, fontSize: 13, color: '#3b82f6' }}>
-            My alliance {auth.alliance ? `[${auth.alliance}]` : ''}
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: otherPlayers.length > 0 ? 24 : 0 }}>
-            {alliancePlayers.map(p => <PlayerCard key={p.id} player={p} />)}
+      {/* Empty state */}
+      {allPlayers.length === 0 && (
+        <div style={{
+          textAlign: 'center', padding: '48px 24px',
+          color: '#475569', fontSize: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{ fontSize: 32 }}>🧩</div>
+          <div style={{ fontWeight: 600, color: '#64748b', fontSize: 15 }}>No matches yet</div>
+          <div style={{ maxWidth: 340 }}>
+            Matches appear when another player is looking for a piece you have as duplicate, or vice versa.
+            Make sure your inventory is up to date!
           </div>
-        </>
+        </div>
       )}
 
-      {otherPlayers.length > 0 && (
+      {/* Search empty */}
+      {allPlayers.length > 0 && filtered.length === 0 && (
+        <div style={{ color: '#475569', fontSize: 14 }}>No matches for "{searchQuery}".</div>
+      )}
+
+      {/* Flat list (most pieces / alpha) */}
+      {useFlat && flatPlayers.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {flatPlayers.map(p => (
+            <PlayerCard key={p.id} player={p} showAlliance searchQuery={searchQuery} sortBy={sortBy} />
+          ))}
+        </div>
+      )}
+
+      {/* Alliance-first layout */}
+      {!useFlat && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <h4 style={{ fontSize: 13, color: '#64748b' }}>Other alliances</h4>
-            <button
-              className="btn-ghost"
-              style={{ fontSize: 12 }}
-              onClick={() => setShowOtherAlliances(v => !v)}
-            >
-              {showOtherAlliances ? 'Hide' : `Show (${otherPlayers.length})`}
-            </button>
-          </div>
-          {showOtherAlliances && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {otherPlayers.map(p => <PlayerCard key={p.id} player={p} showAlliance />)}
-            </div>
+          {alliancePlayers.length > 0 && (
+            <>
+              <h4 style={{ marginBottom: 12, fontSize: 13, color: '#3b82f6' }}>
+                My alliance {auth.alliance ? `[${auth.alliance}]` : ''}
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: otherPlayers.length > 0 ? 24 : 0 }}>
+                {alliancePlayers.map(p => <PlayerCard key={p.id} player={p} searchQuery={searchQuery} sortBy={sortBy} />)}
+              </div>
+            </>
+          )}
+
+          {otherPlayers.length > 0 && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <h4 style={{ fontSize: 13, color: '#64748b' }}>Other alliances</h4>
+                <button
+                  className="btn-ghost"
+                  style={{ fontSize: 12 }}
+                  onClick={() => setShowOtherAlliances(v => !v)}
+                >
+                  {showOtherAlliances ? 'Hide' : `Show (${otherPlayers.length})`}
+                </button>
+              </div>
+              {showOtherAlliances && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {otherPlayers.map(p => <PlayerCard key={p.id} player={p} showAlliance searchQuery={searchQuery} sortBy={sortBy} />)}
+                </div>
+              )}
+            </>
           )}
         </>
       )}
+
     </div>
   );
 }
