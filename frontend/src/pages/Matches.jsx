@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_COLORS = {
@@ -103,7 +104,12 @@ function PlayerCard({ player, showAlliance }) {
   return (
     <div className="card" style={{ fontSize: 13 }}>
       <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 10 }}>
-        {player.username}
+        <Link to={`/players/${player.id}`} style={{ color: '#e2e8f0' }}
+          onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
+          onMouseLeave={e => e.currentTarget.style.color = '#e2e8f0'}
+        >
+          {player.username}
+        </Link>
         {showAlliance && player.alliance && (
           <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{player.alliance}]</span>
         )}
