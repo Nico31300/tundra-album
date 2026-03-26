@@ -7,7 +7,7 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 - **Album & puzzle browser** — navigate albums, puzzles, and individual pieces
 - **Inventory tracking** — mark each piece as *Looking for*, *Have*, or *Have duplicate*
 - **Star ratings** — pieces have a 1–5 star rarity; right-click to edit (admin and stars editor only)
-- **Player matching** — see which players can give you pieces you need, and which pieces they need from you
+- **Player matching** — see which players can give you pieces you need, and which pieces they need from you; filter by "Can give you" or "Needs from you", sort by recency, search by puzzle name, and navigate directly to a player's page from a match card
 - **Player profiles** — browse any player's albums and see their inventory read-only, with your own duplicates highlighted
 - **Alliance system** — players belong to alliances; the players list groups by alliance
 - **Roles** — three roles control access: *Admin*, *Stars editor*, and *User*

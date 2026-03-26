@@ -240,9 +240,18 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.0</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Matches page overhaul - filter by "Can give you" or "Needs from you", sort by last activity, search by puzzle name, collapsible cards, mutual match highlight, refresh button, and navigate to player pages directly from a match card</li>
+                <li>Skeleton loaders on all main pages while data loads</li>
+                <li>Clicking the home button while on the home page refreshes the cards without a full page reload</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.4.0</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
-                <li>Push notifications — get notified when someone clicks a piece on your player page</li>
+                <li>Push notifications - get notified when someone clicks a piece on your player page</li>
               </ul>
             </div>
 
