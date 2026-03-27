@@ -57,7 +57,9 @@ function AppRoutes() {
   const { auth } = useAuth();
 
   useEffect(() => {
-    if (auth) subscribeToPush(auth.token);
+    if (auth && localStorage.getItem('pushNotificationsEnabled') !== 'false') {
+      subscribeToPush(auth.token);
+    }
   }, [auth?.token]);
 
   return (
