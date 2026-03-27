@@ -98,6 +98,8 @@ router.post('/notify/:userId', authMiddleware, (req, res) => {
 
 // Batch scheduler: notify users about new available pieces
 function sendBatchAvailabilityNotifications() {
+  console.log('[push] Batch availability check started');
+
   const usersToNotify = db.prepare(`
     SELECT u.id, COUNT(DISTINCT i_other.piece_id) AS new_count
     FROM users u
@@ -111,7 +113,13 @@ function sendBatchAvailabilityNotifications() {
     GROUP BY u.id
     HAVING new_count > 0
   `).all();
-  
+
+  if (usersToNotify.length === 0) {
+    console.log('[push] No users to notify');
+  }
+
+  let totalSent = 0;
+
   for (const user of usersToNotify) {
     const subs = db.prepare('SELECT * FROM push_subscriptions WHERE user_id = ?').all(user.id);
     const count = user.new_count;
@@ -127,9 +135,14 @@ function sendBatchAvailabilityNotifications() {
       ).catch(err => {
         if (err.statusCode === 410 || err.statusCode === 404) {
           db.prepare('DELETE FROM push_subscriptions WHERE endpoint = ?').run(sub.endpoint);
+          console.log(`[push] Removed stale subscription for user ${user.id} (${err.statusCode})`);
+        } else {
+          console.error(`[push] Failed to notify user ${user.id}:`, err.message);
         }
       });
     }
+    console.log(`[push] Queued ${subs.length} notification(s) for user ${user.id} (${count} new piece(s))`);
+    totalSent += subs.length;
   }
 
   // Advance watermark for all subscribed users so next run only catches truly new pieces
@@ -137,6 +150,8 @@ function sendBatchAvailabilityNotifications() {
     UPDATE users SET last_notified_at = datetime('now')
     WHERE id IN (SELECT DISTINCT user_id FROM push_subscriptions)
   `).run();
+
+  console.log(`[push] Batch done — ${usersToNotify.length} user(s) notified, ${totalSent} notification(s) sent`);
 }
 
 module.exports = router;

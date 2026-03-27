@@ -27,7 +27,10 @@ function purgeOldActivityLogs() {
 }
 purgeOldActivityLogs();
 setInterval(purgeOldActivityLogs, 24 * 60 * 60 * 1000);
-setInterval(sendBatchAvailabilityNotifications, 2 * 60 * 60 * 1000);
+setTimeout(() => {
+  sendBatchAvailabilityNotifications();
+  setInterval(sendBatchAvailabilityNotifications, 2 * 60 * 60 * 1000);
+}, 2 * 60 * 1000);
 
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 
