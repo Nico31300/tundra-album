@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 
 const authRoutes = require('./routes/auth');
@@ -29,6 +30,7 @@ if (!isProd) {
   app.use(cors({ origin: 'http://localhost:5173' }));
 }
 
+app.use(helmet());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
