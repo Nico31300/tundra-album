@@ -252,6 +252,15 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.0</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Available for trade page - see all pieces currently offered as duplicates, grouped by album and puzzle, with links to each provider</li>
+                <li>Batch push notifications - get notified every 2 hours about pieces you need that have become available</li>
+                <li>Auth page polish - navbar and footer are now hidden on login, register, and change-password pages</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.2</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Security hardening - rate limiting, CORS</li>
