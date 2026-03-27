@@ -21,11 +21,11 @@ export default function Home() {
   const { auth } = useAuth();
   const navigate = useNavigate();
 
-  const { data: albums, refetch: refetchAlbums } = useFetch('/api/albums', auth.token);
-  const { data: users, refetch: refetchUsers } = useFetch('/api/users', auth.token);
-  const { data: matches, refetch: refetchMatches } = useFetch('/api/users/matches', auth.token);
-  const { data: missions, refetch: refetchMissions } = useFetch('/api/missions', auth.token);
-  const { data: activitySummary, refetch: refetchActivity } = useFetch('/api/activity/summary', auth.token);
+  const { data: albums, error: albumsError, refetch: refetchAlbums } = useFetch('/api/albums', auth.token);
+  const { data: users, error: usersError, refetch: refetchUsers } = useFetch('/api/users', auth.token);
+  const { data: matches, error: matchesError, refetch: refetchMatches } = useFetch('/api/users/matches', auth.token);
+  const { data: missions, error: missionsError, refetch: refetchMissions } = useFetch('/api/missions', auth.token);
+  const { data: activitySummary, error: activityError, refetch: refetchActivity } = useFetch('/api/activity/summary', auth.token);
 
   useEffect(() => {
     const handler = () => {
@@ -66,7 +66,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Albums</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {albums === null ? <Skeleton /> : <>
+            {albums === null && !albumsError ? <Skeleton /> : <>
               {totalNeed > 0 && <div style={{ color: STATUS_COLORS.need }}>Looking for: {totalNeed}</div>}
               {totalDuplicates > 0 && <div style={{ color: STATUS_COLORS.have_duplicate }}>Have duplicates: {totalDuplicates}</div>}
               {totalNeed === 0 && totalDuplicates === 0 && <div style={{ color: '#475569' }}>No active pieces</div>}
@@ -106,7 +106,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Players</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {users === null ? <Skeleton /> : <>
+            {users === null && !usersError ? <Skeleton /> : <>
               <div style={{ color: '#e2e8f0' }}>Players: {totalPlayers}</div>
               {playersNeed > 0 && <div style={{ color: STATUS_COLORS.need }}>Looking for: {playersNeed}</div>}
               {playersOffering > 0 && <div style={{ color: STATUS_COLORS.have_duplicate }}>Offering: {playersOffering}</div>}
@@ -125,7 +125,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Matches</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {!matches && <Skeleton />}
+            {!matches && !matchesError && <Skeleton />}
             {matches && matches.players.length === 0 && (
               <div style={{ color: '#475569' }}>No matches yet</div>
             )}
@@ -158,7 +158,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>My Missions</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {!missions && <Skeleton />}
+            {!missions && !missionsError && <Skeleton />}
           </div>
           {missions && (() => {
             const total = missions.tasks.length;
@@ -214,7 +214,7 @@ export default function Home() {
         >
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Recent Activity</div>
           <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            {!activitySummary && <Skeleton />}
+            {!activitySummary && !activityError && <Skeleton />}
             {activitySummary && activitySummary.pieces === 0 && activitySummary.newUsers === 0 && (
               <div style={{ color: '#475569' }}>No activity</div>
             )}

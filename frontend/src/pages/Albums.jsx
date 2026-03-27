@@ -25,7 +25,7 @@ export default function Albums() {
       <h2 style={{ marginBottom: 20 }}>My Albums</h2>
       {error && <div style={{ color: '#f87171', marginBottom: 16, fontSize: 14 }}>{error}</div>}
       <div className="grid-3" style={{ gridAutoRows: '1fr' }}>
-        {albums === null && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        {albums === null && !error && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         {albums?.map(album => {
           const allDone = album.stats?.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
           const owned = (album.stats?.have ?? 0) + (album.stats?.have_duplicate ?? 0);
