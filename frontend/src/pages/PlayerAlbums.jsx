@@ -228,7 +228,18 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
 
   function handlePieceClick(piece, albumName) {
     const text = buildMatchMessage(username, messageIntro, [piece]);
-    navigator.clipboard.writeText(text);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
     setCopiedId(piece.piece_id);
     setTimeout(() => setCopiedId(null), 300);
 
