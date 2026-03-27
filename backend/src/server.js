@@ -18,6 +18,7 @@ const { sendBatchAvailabilityNotifications } = require('./routes/push');
 const db = require('./database');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 const isProd = process.env.NODE_ENV === 'production';
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:5173';
