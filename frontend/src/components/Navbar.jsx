@@ -240,6 +240,13 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.1</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Bug fix - Albums tab on player page no longer crashes</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.0</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Matches page overhaul - filter by "Can give you" or "Needs from you", sort by last activity, search by puzzle name, collapsible cards, mutual match highlight, refresh button, and navigate to player pages directly from a match card</li>
