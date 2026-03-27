@@ -46,20 +46,24 @@ router.get('/:albumId', authMiddleware, (req, res) => {
   const userId = req.user.id;
 
   const album = db.prepare('SELECT * FROM albums WHERE id = ?').get(albumId);
-  if (!album) return res.status(404).json({ error: 'Album introuvable' });
+  if (!album) return res.status(404).json({ error: 'Album not found' });
 
   const puzzles = db.prepare('SELECT * FROM puzzles WHERE album_id = ? ORDER BY position').all(albumId);
 
-  const puzzlesWithPieces = puzzles.map(puzzle => {
-    const pieces = db.prepare(`
-      SELECT p.*, i.status
-      FROM pieces p
-      LEFT JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
-      WHERE p.puzzle_id = ?
-      ORDER BY p.position
-    `).all(userId, puzzle.id);
-    return { ...puzzle, pieces };
-  });
+  const allPieces = db.prepare(`
+    SELECT p.*, i.status
+    FROM pieces p
+    LEFT JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
+    WHERE p.puzzle_id IN (SELECT id FROM puzzles WHERE album_id = ?)
+    ORDER BY p.position
+  `).all(userId, albumId);
+
+  const piecesByPuzzle = {};
+  for (const piece of allPieces) {
+    (piecesByPuzzle[piece.puzzle_id] = piecesByPuzzle[piece.puzzle_id] || []).push(piece);
+  }
+
+  const puzzlesWithPieces = puzzles.map(puzzle => ({ ...puzzle, pieces: piecesByPuzzle[puzzle.id] ?? [] }));
 
   res.json({ ...album, puzzles: puzzlesWithPieces });
 });

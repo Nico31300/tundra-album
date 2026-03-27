@@ -105,7 +105,7 @@ router.get('/:userId/matches', authMiddleware, (req, res) => {
   const currentUserId = req.user.id;
 
   const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
-  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
   // Pieces I can give them: I have_duplicate, they need
   const iCanGive = db.prepare(`
@@ -143,7 +143,7 @@ router.get('/:userId/albums', authMiddleware, (req, res) => {
   const { userId } = req.params;
 
   const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
-  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
   const albums = db.prepare('SELECT * FROM albums ORDER BY position').all();
 
@@ -188,32 +188,39 @@ router.get('/:userId/albums/:albumId', authMiddleware, (req, res) => {
   const currentUserId = req.user.id;
 
   const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
-  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
   const album = db.prepare('SELECT * FROM albums WHERE id = ?').get(albumId);
-  if (!album) return res.status(404).json({ error: 'Album introuvable' });
+  if (!album) return res.status(404).json({ error: 'Album not found' });
 
   const puzzles = db.prepare('SELECT * FROM puzzles WHERE album_id = ? ORDER BY position').all(albumId);
 
-  const puzzlesWithPieces = puzzles.map(puzzle => {
-    const pieces = db.prepare(`
-      SELECT p.*,
-             i_target.status AS status,
-             i_me.status AS my_status
-      FROM pieces p
-      LEFT JOIN inventory i_target ON i_target.piece_id = p.id AND i_target.user_id = ?
-      LEFT JOIN inventory i_me ON i_me.piece_id = p.id AND i_me.user_id = ?
-      WHERE p.puzzle_id = ?
-      ORDER BY p.position
-    `).all(userId, currentUserId, puzzle.id);
-    const lastUpdated = db.prepare(`
-      SELECT MAX(i.updated_at) AS last_updated
-      FROM pieces p
-      JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?
-      WHERE p.puzzle_id = ?
-    `).get(userId, puzzle.id);
-    return { ...puzzle, pieces, last_updated: lastUpdated?.last_updated ?? null };
-  });
+  const allPieces = db.prepare(`
+    SELECT p.*,
+           i_target.status AS status,
+           i_me.status AS my_status,
+           i_target.updated_at AS target_updated_at
+    FROM pieces p
+    LEFT JOIN inventory i_target ON i_target.piece_id = p.id AND i_target.user_id = ?
+    LEFT JOIN inventory i_me ON i_me.piece_id = p.id AND i_me.user_id = ?
+    WHERE p.puzzle_id IN (SELECT id FROM puzzles WHERE album_id = ?)
+    ORDER BY p.position
+  `).all(userId, currentUserId, albumId);
+
+  const piecesByPuzzle = {};
+  const lastUpdatedByPuzzle = {};
+  for (const piece of allPieces) {
+    (piecesByPuzzle[piece.puzzle_id] = piecesByPuzzle[piece.puzzle_id] || []).push(piece);
+    if (piece.target_updated_at && piece.target_updated_at > (lastUpdatedByPuzzle[piece.puzzle_id] ?? '')) {
+      lastUpdatedByPuzzle[piece.puzzle_id] = piece.target_updated_at;
+    }
+  }
+
+  const puzzlesWithPieces = puzzles.map(puzzle => ({
+    ...puzzle,
+    pieces: piecesByPuzzle[puzzle.id] ?? [],
+    last_updated: lastUpdatedByPuzzle[puzzle.id] ?? null,
+  }));
 
   res.json({ user, album: { ...album, puzzles: puzzlesWithPieces } });
 });
