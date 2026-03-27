@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { version } from '../../package.json';
-import { Home, Menu, X } from 'lucide-react';
+import { Home, X, User, ChevronDown, Shield, ArrowLeftRight, Settings, Download, Info, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { auth, logout } = useAuth();
@@ -60,8 +60,6 @@ export default function Navbar() {
     navigate(`/albums/${albumId}?puzzleId=${puzzleId}`);
   }
 
-  const initial = auth?.username?.[0]?.toUpperCase() ?? '?';
-
   return (
     <>
     <nav style={{
@@ -116,98 +114,103 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Right: avatar/menu */}
+      {/* Right: user menu */}
       {auth && (
         <div ref={avatarRef} className="navbar-right" style={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
           <button
             onClick={() => setAvatarOpen(v => !v)}
-            className="navbar-avatar-btn"
             style={{
-              width: 34, height: 34, borderRadius: '50%',
-              background: '#3b82f6', color: '#fff',
-              fontWeight: 700, fontSize: 14,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: 'none', cursor: 'pointer', padding: 0,
-              flexShrink: 0,
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '5px 10px 5px 8px', borderRadius: 20,
+              background: avatarOpen ? '#334155' : 'transparent',
+              border: '1px solid #334155',
+              color: '#e2e8f0', cursor: 'pointer', flexShrink: 0,
+              fontSize: 13, fontWeight: 500,
             }}
           >
-            <span className="navbar-desktop">{initial}</span>
-            <span className="navbar-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Menu size={18} /></span>
+            <User size={15} style={{ flexShrink: 0 }} />
+            <span className="navbar-desktop" style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{auth.username}</span>
+            <ChevronDown size={13} style={{ color: '#64748b', transform: avatarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }} />
           </button>
 
           {avatarOpen && (
             <div style={{
               position: 'absolute', right: 0, top: 'calc(100% + 8px)',
               background: '#1e293b', border: '1px solid #334155', borderRadius: 10,
-              minWidth: 180, zIndex: 200, overflow: 'hidden',
+              minWidth: 200, zIndex: 200, overflow: 'hidden',
             }}>
+              {/* Header */}
               <div style={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{auth.username}</div>
                 {auth.alliance && (
-                  <div style={{ color: '#3b82f6', fontSize: 13, marginTop: 2 }}>[{auth.alliance}]</div>
+                  <div style={{ color: '#3b82f6', fontSize: 12, marginTop: 2 }}>[{auth.alliance}]</div>
                 )}
               </div>
+
+              {/* Admin — admin only */}
+              {auth.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  onClick={() => setAvatarOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', fontSize: 13, color: '#e2e8f0', borderBottom: '1px solid #334155' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                  onMouseLeave={e => e.currentTarget.style.background = ''}
+                >
+                  <Shield size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                  Admin
+                </Link>
+              )}
+
+              {/* Navigation */}
               <Link
                 to="/available"
                 onClick={() => setAvatarOpen(false)}
-                style={{
-                  display: 'block', padding: '10px 16px', fontSize: 13,
-                  color: '#e2e8f0', borderBottom: '1px solid #334155',
-                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', fontSize: 13, color: '#e2e8f0' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                 onMouseLeave={e => e.currentTarget.style.background = ''}
               >
+                <ArrowLeftRight size={14} style={{ color: '#64748b', flexShrink: 0 }} />
                 Available for trade
               </Link>
               <Link
                 to="/settings"
                 onClick={() => setAvatarOpen(false)}
-                style={{
-                  display: 'block', padding: '10px 16px', fontSize: 13,
-                  color: '#e2e8f0',
-                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', fontSize: 13, color: '#e2e8f0', borderBottom: '1px solid #334155' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                 onMouseLeave={e => e.currentTarget.style.background = ''}
               >
+                <Settings size={14} style={{ color: '#64748b', flexShrink: 0 }} />
                 Settings
               </Link>
+
+              {/* App actions */}
               <button
                 onClick={() => { setAvatarOpen(false); setInstallOpen(true); }}
-                style={{
-                  display: 'block', width: '100%', textAlign: 'left',
-                  padding: '10px 16px', fontSize: 13,
-                  background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer',
-                  borderTop: '1px solid #334155',
-                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 13, background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
+                <Download size={14} style={{ color: '#64748b', flexShrink: 0 }} />
                 Install app
               </button>
               <button
                 onClick={() => { setAvatarOpen(false); setAboutOpen(true); }}
-                style={{
-                  display: 'block', width: '100%', textAlign: 'left',
-                  padding: '10px 16px', fontSize: 13,
-                  background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer',
-                  borderTop: '1px solid #334155',
-                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 13, background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer', borderBottom: '1px solid #334155' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
+                <Info size={14} style={{ color: '#64748b', flexShrink: 0 }} />
                 About
               </button>
+
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                style={{
-                  display: 'block', width: '100%', textAlign: 'left',
-                  padding: '10px 16px', fontSize: 13,
-                  background: 'none', border: 'none', color: '#f87171', cursor: 'pointer',
-                  borderTop: '1px solid #334155',
-                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 13, background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
+                <LogOut size={14} style={{ flexShrink: 0 }} />
                 Logout
               </button>
             </div>

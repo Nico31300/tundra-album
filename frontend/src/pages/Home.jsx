@@ -191,19 +191,6 @@ export default function Home() {
           })()}
         </div>
 
-        {/* Admin card — admin only */}
-        {auth.role === 'admin' && (
-          <div
-            className="card"
-            onClick={() => navigate('/admin')}
-            style={cardStyle}
-            onMouseEnter={e => e.currentTarget.style.background = '#263347'}
-            onMouseLeave={e => e.currentTarget.style.background = ''}
-          >
-            <div style={{ fontWeight: 700, fontSize: 16 }}>Admin</div>
-          </div>
-        )}
-
         {/* Recent Activity card */}
         <div
           className="card"
