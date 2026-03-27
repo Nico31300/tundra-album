@@ -29,7 +29,7 @@ setInterval(purgeOldActivityLogs, 24 * 60 * 60 * 1000);
 
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
