@@ -91,7 +91,7 @@ railway ssh --project=<PROJECT_ID> --environment=<ENVIRONMENT_ID> --service=<SER
 
 **2. Checkpoint the WAL and create a clean backup**
 ```bash
-node -e "const db = require('/app/node_modules/better-sqlite3')('/data/tundra.db'); db.pragma('wal_checkpoint(FULL)'); db.backup('/data/tundra-clean.db').then(() => console.log('done'))"
+node -e "const db = require('/app/backend/node_modules/better-sqlite3')('/data/tundra.db'); db.pragma('wal_checkpoint(FULL)'); db.backup('/data/tundra-clean.db').then(() => console.log('done'))"
 exit
 ```
 

@@ -586,7 +586,8 @@ const MILESTONES = [
   ['Crystalline Mysteries','Use X Crystallite Core(s) in [Flame and Fangs]',3,'500',0,0,'Rare','Rare Puzzle Fragment'],
   ['Crystalline Mysteries','Use X Crystallite Core(s) in [Flame and Fangs]',4,'800',0,0,'Rare','Rare Puzzle Fragment'],
   ['Crystalline Mysteries','Use X Crystallite Core(s) in [Flame and Fangs]',5,'1,200',0,0,'Epic','Epic Puzzle Fragment'],
-  ['Crystalline Mysteries','Use X Crystallite Core(s) in [Flame and Fangs]',6,null,1,0,null,null],
+  ['Crystalline Mysteries','Use X Crystallite Core(s) in [Flame and Fangs]',6,'1800',0,0,'Epic','Epic Puzzle Fragment'],
+  ['Crystalline Mysteries','Use X Crystallite Core(s) in [Flame and Fangs]',7,null,1,0,'Epic','Epic Puzzle Fragment'],
   // Crystalline Mysteries — Perform X standard refinement(s) in Crystal Lab
   ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',1,'70',0,0,'Rare','Rare Puzzle Fragment'],
   ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',2,'150',0,0,'Rare','Rare Puzzle Fragment'],
@@ -594,7 +595,8 @@ const MILESTONES = [
   ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',4,'400',0,0,'Rare','Rare Puzzle Fragment'],
   ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',5,'600',0,0,'Epic','Epic Puzzle Fragment'],
   ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',6,'900',0,0,'Epic','Epic Puzzle Fragment'],
-  ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',7,null,1,0,null,null],
+  ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',7,'1800',0,0,'Epic','Epic Puzzle Fragment'],
+  ['Crystalline Mysteries','Perform X standard refinement(s) in Crystal Lab',8,null,1,0,'Epic','Epic Puzzle Fragment'],
   // Ballad of Wind and Cold — Obtain X Medal(s) of Honor in [King of Icefield]
   ['Ballad of Wind and Cold','Obtain X Medal(s) of Honor in [King of Icefield]',1,'25',0,0,'Rare','Rare Puzzle Fragment'],
   ['Ballad of Wind and Cold','Obtain X Medal(s) of Honor in [King of Icefield]',2,'60',0,0,'Rare','Rare Puzzle Fragment'],
@@ -716,7 +718,8 @@ const MILESTONES = [
   ['Frostdragon Empire','Become the Frostdragon Tyrant',1,'1',0,1,'Mythic','Mythic Puzzle Fragment'],
   // Frostdragon Empire — Place X Tyrant Prediction(s)
   ['Frostdragon Empire','Place X Tyrant Prediction(s)',1,'5',0,0,'Rare','Rare Puzzle Fragment'],
-  ['Frostdragon Empire','Place X Tyrant Prediction(s)',2,null,1,0,null,null],
+  ['Frostdragon Empire','Place X Tyrant Prediction(s)',2,'10',0,0,'Rare','Rare Puzzle Fragment'],
+  ['Frostdragon Empire','Place X Tyrant Prediction(s)',3,null,1,0,'Rare','Rare Puzzle Fragment'],
   // Frostdragon Empire — Complete X mission(s) in Frostwind Journey
   ['Frostdragon Empire','Complete X mission(s) in Frostwind Journey',1,'30',0,0,'Rare','Rare Puzzle Fragment'],
   ['Frostdragon Empire','Complete X mission(s) in Frostwind Journey',2,'60',0,0,'Rare','Rare Puzzle Fragment'],
