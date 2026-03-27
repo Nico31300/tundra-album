@@ -37,7 +37,7 @@ router.post('/register', (req, res) => {
   }
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', loginLimiter, (req, res) => {
   const { username, password } = req.body;
   const user = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.username = ?').get(username);
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {

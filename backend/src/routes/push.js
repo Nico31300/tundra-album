@@ -57,6 +57,14 @@ router.post('/notify/:userId', authMiddleware, (req, res) => {
   const targetUserId = Number(req.params.userId);
   const { pieceName, puzzleName, albumName, section, pieceId, puzzleId, albumId } = req.body;
 
+  const match = db.prepare(`
+    SELECT 1 FROM inventory i1
+    JOIN inventory i2 ON i1.piece_id = i2.piece_id AND i1.piece_id = ?
+    WHERE (i1.user_id = ? AND i1.status = 'have_duplicate' AND i2.user_id = ? AND i2.status = 'need')
+       OR (i1.user_id = ? AND i1.status = 'need' AND i2.user_id = ? AND i2.status = 'have_duplicate')
+  `).get(pieceId, req.user.id, targetUserId, req.user.id, targetUserId);
+  if (!match) return res.status(403).json({ error: 'No match found for this piece' });
+
   const subscriptions = db.prepare('SELECT * FROM push_subscriptions WHERE user_id = ?').all(targetUserId);
   if (subscriptions.length === 0) return res.json({ ok: true, sent: 0 });
 
