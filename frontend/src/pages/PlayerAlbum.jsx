@@ -15,13 +15,34 @@ const STATUS_LABELS = {
   have: 'Have',
 };
 
+function SkeletonPlayerAlbum() {
+  return (
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <div className="skeleton" style={{ height: 14, width: 80 }} />
+        <div className="skeleton" style={{ height: 22, width: 200 }} />
+      </div>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="card" style={{ marginBottom: 16 }}>
+          <div className="skeleton" style={{ height: 14, width: '30%', marginBottom: 14 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 100px))', gap: 8 }}>
+            {Array.from({ length: 9 }).map((_, j) => (
+              <div key={j} className="skeleton" style={{ height: 46, borderRadius: 6 }} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function PlayerAlbum() {
   const { userId, albumId } = useParams();
   const { auth } = useAuth();
   const { data, error } = useFetch(`/api/users/${userId}/albums/${albumId}`, auth.token);
 
   if (error) return <div style={{ padding: 32, color: '#f87171' }}>{error}</div>;
-  if (!data) return <div style={{ padding: 32 }}>Loading...</div>;
+  if (!data) return <SkeletonPlayerAlbum />;
 
   const { user, album } = data;
 

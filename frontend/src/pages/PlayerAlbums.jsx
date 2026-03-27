@@ -1,13 +1,48 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CircleChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
+import { useFetch } from '../hooks/useFetch';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
   have_duplicate: '#22c55e',
 };
+
+function SkeletonPlayerAlbums() {
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
+          <div className="skeleton" style={{ height: 20, width: 20, borderRadius: '50%' }} />
+          <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+            <div className="skeleton" style={{ height: 30, width: 72, borderRadius: 6 }} />
+            <div className="skeleton" style={{ height: 30, width: 72, borderRadius: 6 }} />
+          </div>
+        </div>
+        <div className="skeleton" style={{ height: 22, width: 180, marginTop: 8 }} />
+      </div>
+      <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+        {Array.from({ length: 2 }).map((_, col) => (
+          <div key={col} style={{ flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="skeleton" style={{ height: 14, width: '40%' }} />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="card" style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="skeleton" style={{ height: 12, width: '50%' }} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <div key={j} className="skeleton" style={{ height: 46, width: 60, borderRadius: 6 }} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function PlayerAlbums() {
   const { userId } = useParams();
@@ -15,18 +50,13 @@ export default function PlayerAlbums() {
   const [searchParams] = useSearchParams();
   const { auth } = useAuth();
   const highlightedPieceId = Number(searchParams.get('id')) || null;
-  const [data, setData] = useState(null);
-  const [view, setView] = useState('matches'); // 'albums' | 'matches'
-  const [matches, setMatches] = useState(null);
+  const [view, setView] = useState('matches');
 
-  const headers = { Authorization: `Bearer ${auth.token}` };
+  const { data, error: dataError } = useFetch(`/api/users/${userId}/albums`, auth.token);
+  const { data: matches, error: matchesError } = useFetch(`/api/users/${userId}/matches`, auth.token);
 
-  useEffect(() => {
-    fetch(`/api/users/${userId}/albums`, { headers }).then(r => r.json()).then(setData);
-    fetch(`/api/users/${userId}/matches`, { headers }).then(r => r.json()).then(setMatches);
-  }, [userId]);
-
-  if (!data) return <div style={{ padding: 32 }}>Loading...</div>;
+  if (dataError) return <div style={{ padding: 32, color: '#f87171' }}>{dataError}</div>;
+  if (!data) return <SkeletonPlayerAlbums />;
 
   const { user, albums } = data;
 
@@ -113,7 +143,7 @@ export default function PlayerAlbums() {
       )}
 
       {view === 'matches' && (
-        <MatchesView matches={matches} username={user.username} targetUserId={userId} token={auth.token} highlightedPieceId={highlightedPieceId} />
+        <MatchesView matches={matches} error={matchesError} username={user.username} targetUserId={userId} token={auth.token} highlightedPieceId={highlightedPieceId} />
       )}
     </div>
   );
@@ -255,7 +285,8 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
   );
 }
 
-function MatchesView({ matches, username, targetUserId, token, highlightedPieceId }) {
+function MatchesView({ matches, error, username, targetUserId, token, highlightedPieceId }) {
+  if (error) return <div style={{ color: '#f87171', fontSize: 14 }}>{error}</div>;
   if (!matches) return <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>;
 
   const iCanGiveAlbums = groupByAlbumPuzzle(matches.iCanGive);

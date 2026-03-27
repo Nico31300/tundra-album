@@ -165,7 +165,27 @@ useEffect(() => {
     setPieceStatus(piece.id, next);
   }
 
-  if (!album) return <div style={{ padding: 32 }}>Loading...</div>;
+  if (!album) return (
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <div className="skeleton" style={{ height: 22, width: 240 }} />
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <div className="skeleton" style={{ height: 32, width: 32, borderRadius: 6 }} />
+          <div className="skeleton" style={{ height: 32, width: 32, borderRadius: 6 }} />
+        </div>
+      </div>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="card" style={{ marginBottom: 16 }}>
+          <div className="skeleton" style={{ height: 14, width: '30%', marginBottom: 14 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 8 }}>
+            {Array.from({ length: 9 }).map((_, j) => (
+              <div key={j} className="skeleton" style={{ height: 56, borderRadius: 6 }} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
 const currentIndex = albums.findIndex(a => a.id === album.id);
   const prevAlbum = currentIndex > 0 ? albums[currentIndex - 1] : null;
