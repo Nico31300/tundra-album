@@ -3,6 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getPushSubscription, subscribeToPush, unsubscribeFromPush } from '../utils/pushNotifications';
 
+const PUSH_PREF_KEY = 'pushNotificationsEnabled';
+
+const HOME_CARDS = [
+  { key: 'albums',   label: 'My Albums' },
+  { key: 'players',  label: 'Players' },
+  { key: 'matches',  label: 'My Matches' },
+  { key: 'missions', label: 'My Missions' },
+  { key: 'activity', label: 'Recent Activity' },
+];
+
+function getHomeCardsPrefs() {
+  try {
+    const stored = localStorage.getItem('homeCards');
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return Object.fromEntries(HOME_CARDS.map(c => [c.key, true]));
+}
+
 export default function Settings() {
   const { auth, updateAuth } = useAuth();
   const navigate = useNavigate();
@@ -11,26 +29,49 @@ export default function Settings() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const [pushEnabled, setPushEnabled] = useState(null);
   const [pushLoading, setPushLoading] = useState(false);
   const pushSupported = 'serviceWorker' in navigator && 'PushManager' in window;
 
+  const [homeCards, setHomeCards] = useState(getHomeCardsPrefs);
+
   useEffect(() => {
     if (!pushSupported) return;
-    getPushSubscription().then(sub => setPushEnabled(!!sub));
+    const pref = localStorage.getItem(PUSH_PREF_KEY);
+    if (pref === 'false') {
+      setPushEnabled(false);
+      return;
+    }
+    getPushSubscription().then(sub => {
+      const enabled = !!sub;
+      setPushEnabled(enabled);
+      if (enabled) localStorage.setItem(PUSH_PREF_KEY, 'true');
+    });
   }, []);
 
   async function togglePush() {
     setPushLoading(true);
     if (pushEnabled) {
       await unsubscribeFromPush(auth.token);
+      localStorage.setItem(PUSH_PREF_KEY, 'false');
       setPushEnabled(false);
     } else {
       await subscribeToPush(auth.token);
       const sub = await getPushSubscription();
-      setPushEnabled(!!sub);
+      const enabled = !!sub;
+      setPushEnabled(enabled);
+      localStorage.setItem(PUSH_PREF_KEY, enabled ? 'true' : 'false');
     }
     setPushLoading(false);
+  }
+
+  function toggleCard(key) {
+    setHomeCards(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem('homeCards', JSON.stringify(next));
+      return next;
+    });
   }
 
   async function handleSubmit(e) {
@@ -59,9 +100,32 @@ export default function Settings() {
     }
   }
 
+  function Toggle({ enabled, onToggle, disabled }) {
+    return (
+      <button
+        onClick={onToggle}
+        disabled={disabled}
+        style={{
+          width: 44, height: 24, borderRadius: 12, border: 'none',
+          background: enabled ? '#3b82f6' : '#334155',
+          cursor: disabled ? 'default' : 'pointer',
+          position: 'relative', flexShrink: 0, transition: 'background 0.2s',
+        }}
+      >
+        <span style={{
+          position: 'absolute', top: 3, width: 18, height: 18, borderRadius: '50%',
+          background: '#fff', transition: 'left 0.2s',
+          left: enabled ? 23 : 3,
+        }} />
+      </button>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 420, margin: '48px auto', padding: '0 16px' }}>
       <h2 style={{ marginBottom: 24 }}>Settings</h2>
+
+      {/* Profile */}
       <div className="card">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
@@ -84,6 +148,7 @@ export default function Settings() {
         </form>
       </div>
 
+      {/* Push notifications */}
       {pushSupported && (
         <div className="card" style={{ marginTop: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -99,25 +164,34 @@ export default function Settings() {
                   : 'Disabled on this device'}
               </div>
             </div>
-            <button
-              onClick={togglePush}
+            <Toggle
+              enabled={!!pushEnabled}
+              onToggle={togglePush}
               disabled={pushLoading || pushEnabled === null || Notification.permission === 'denied'}
-              style={{
-                width: 44, height: 24, borderRadius: 12, border: 'none',
-                background: pushEnabled ? '#3b82f6' : '#334155',
-                cursor: pushLoading || Notification.permission === 'denied' ? 'default' : 'pointer',
-                position: 'relative', flexShrink: 0, transition: 'background 0.2s',
-              }}
-            >
-              <span style={{
-                position: 'absolute', top: 3, width: 18, height: 18, borderRadius: '50%',
-                background: '#fff', transition: 'left 0.2s',
-                left: pushEnabled ? 23 : 3,
-              }} />
-            </button>
+            />
           </div>
         </div>
       )}
+
+      {/* Home dashboard cards */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 14 }}>Home dashboard</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {HOME_CARDS.map(({ key, label }, i) => (
+            <div
+              key={key}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 0',
+                borderTop: i > 0 ? '1px solid #334155' : 'none',
+              }}
+            >
+              <span style={{ fontSize: 13 }}>{label}</span>
+              <Toggle enabled={homeCards[key]} onToggle={() => toggleCard(key)} />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -17,9 +17,18 @@ const STATUS_COLORS = {
   have_duplicate: '#22c55e',
 };
 
+function getHomeCards() {
+  try {
+    const stored = localStorage.getItem('homeCards');
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return {};
+}
+
 export default function Home() {
   const { auth } = useAuth();
   const navigate = useNavigate();
+  const cards = getHomeCards();
 
   const { data: albums, error: albumsError, refetch: refetchAlbums } = useFetch('/api/albums', auth.token);
   const { data: users, error: usersError, refetch: refetchUsers } = useFetch('/api/users', auth.token);
@@ -57,7 +66,7 @@ export default function Home() {
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <div className="home-cards">
         {/* My Albums card */}
-        <div
+        {cards.albums !== false && <div
           className="card"
           onClick={() => navigate('/albums')}
           style={cardStyle}
@@ -94,10 +103,10 @@ export default function Home() {
               </div>
             </div>
           )}
-        </div>
+        </div>}
 
         {/* Players card */}
-        <div
+        {cards.players !== false && <div
           className="card"
           onClick={() => navigate('/players')}
           style={cardStyle}
@@ -113,10 +122,10 @@ export default function Home() {
               {playersNeed === 0 && playersOffering === 0 && <div style={{ color: '#475569' }}>No active trades</div>}
             </>}
           </div>
-        </div>
+        </div>}
 
         {/* My Matches card */}
-        <div
+        {cards.matches !== false && <div
           className="card"
           onClick={() => navigate('/matches')}
           style={cardStyle}
@@ -147,9 +156,9 @@ export default function Home() {
               </>
             )}
           </div>
-        </div>
+        </div>}
         {/* My Missions card */}
-        <div
+        {cards.missions !== false && <div
           className="card"
           onClick={() => navigate('/missions')}
           style={cardStyle}
@@ -189,10 +198,10 @@ export default function Home() {
               <div style={{ color: '#475569', fontSize: 13 }}>No missions</div>
             );
           })()}
-        </div>
+        </div>}
 
         {/* Recent Activity card */}
-        <div
+        {cards.activity !== false && <div
           className="card"
           onClick={() => auth.role === 'admin' && navigate('/activity')}
           style={{ ...cardStyle, cursor: auth.role === 'admin' ? 'pointer' : 'default' }}
@@ -218,7 +227,7 @@ export default function Home() {
             )}
           </div>
           <div style={{ fontSize: 11, color: '#475569', marginTop: 8, textAlign: 'right' }}>Last 24 hours</div>
-        </div>
+        </div>}
 
       </div>
     </div>
