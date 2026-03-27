@@ -16,7 +16,7 @@ router.put('/:pieceId', authMiddleware, (req, res) => {
       FROM pieces p JOIN puzzles pz ON pz.id = p.puzzle_id
       WHERE p.id = ?
     `).get(pieceId);
-    if (!piece) return res.status(404).json({ error: 'Pièce introuvable' });
+    if (!piece) return res.status(404).json({ error: 'Piece not found' });
 
     const user = db.prepare('SELECT username FROM users WHERE id = ?').get(userId);
     const existing = db.prepare('SELECT status FROM inventory WHERE user_id = ? AND piece_id = ?').get(userId, pieceId);

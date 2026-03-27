@@ -14,7 +14,7 @@ router.put('/:pieceId/stars', authMiddleware, requireRole('admin', 'stars_editor
   }
 
   const piece = db.prepare('SELECT id FROM pieces WHERE id = ?').get(pieceId);
-  if (!piece) return res.status(404).json({ error: 'Pièce introuvable' });
+  if (!piece) return res.status(404).json({ error: 'Piece not found' });
 
   db.prepare('UPDATE pieces SET stars = ? WHERE id = ?').run(stars, pieceId);
   res.json({ pieceId: Number(pieceId), stars });

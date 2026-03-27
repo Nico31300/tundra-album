@@ -60,7 +60,7 @@ router.put('/users/:id', (req, res) => {
 
     res.json(updated);
   } catch (e) {
-    if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Nom d\'utilisateur déjà pris' });
+    if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Username already taken' });
     res.status(500).json({ error: e.message });
   }
 });
