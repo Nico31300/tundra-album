@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CircleChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
