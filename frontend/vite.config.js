@@ -56,6 +56,9 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    modulePreload: { polyfill: false },
+  },
   server: {
     port: 5173,
     proxy: {
