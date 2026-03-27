@@ -12,18 +12,18 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 
 ## Features
 
-- **Album & puzzle browser** — navigate albums, puzzles, and individual pieces
-- **Inventory tracking** — mark each piece as *Looking for*, *Have*, or *Have duplicate*
-- **Star ratings** — pieces have a 1–5 star rarity; right-click to edit (admin and stars editor only)
-- **Player matching** — see which players can give you pieces you need, and which pieces they need from you; filter by "Can give you" or "Needs from you", sort by recency, search by puzzle name, and navigate directly to a player's page from a match card
-- **Player profiles** — browse any player's albums and see their inventory read-only, with your own duplicates highlighted
-- **Alliance system** — players belong to alliances; the players list groups by alliance
-- **Roles** — three roles control access: *Admin*, *Stars editor*, and *User*
-- **Album Missions** — track per-album mission milestones (Rare / Epic / Mythic); mark milestones as completed, step back, reset per album, and toggle visibility of completed missions
-- **Activity log** — all inventory, user, and admin actions are logged; admins can browse the paginated log (20 per page) with filters by category and user (all users shown, not just recent); logs older than 7 days are automatically pruned; a 24-hour summary card is visible to all users on the home dashboard
-- **Admin area** — admins can manage users (name, alliance, password, role), albums (create, rename, reorder, delete, manage puzzles and piece counts), and mission milestones (add tasks, add/edit/delete milestones per album)
-- **Progressive Web App** — installable on Android, iOS, and desktop; works offline for cached pages; install via *avatar menu → Install app*
-- **Push notifications** — players receive a browser push notification when someone clicks a piece on their player page
+- **Album & puzzle browser** - navigate albums, puzzles, and individual pieces
+- **Inventory tracking** - mark each piece as *Looking for*, *Have*, or *Have duplicate*
+- **Star ratings** - pieces have a 1–5 star rarity; right-click to edit (admin and stars editor only)
+- **Player matching** - see which players can give you pieces you need, and which pieces they need from you; filter by "Can give you" or "Needs from you", sort by recency, search by puzzle name, and navigate directly to a player's page from a match card
+- **Player profiles** - browse any player's albums and see their inventory read-only, with your own duplicates highlighted
+- **Alliance system** - players belong to alliances; the players list groups by alliance
+- **Roles** - three roles control access: *Admin*, *Stars editor*, and *User*
+- **Album Missions** - track per-album mission milestones (Rare / Epic / Mythic); mark milestones as completed, step back, reset per album, and toggle visibility of completed missions
+- **Activity log** - all inventory, user, and admin actions are logged; admins can browse the paginated log (20 per page) with filters by category and user (all users shown, not just recent); logs older than 7 days are automatically pruned; a 24-hour summary card is visible to all users on the home dashboard
+- **Admin area** - admins can manage users (name, alliance, password, role), albums (create, rename, reorder, delete, manage puzzles and piece counts), and mission milestones (add tasks, add/edit/delete milestones per album)
+- **Progressive Web App** - installable on Android, iOS, and desktop; works offline for cached pages; install via *avatar menu → Install app*
+- **Push notifications** - players receive a browser push notification when someone clicks a piece on their player page
 
 ## Tech Stack
 
@@ -65,7 +65,7 @@ The frontend proxies API requests to `http://localhost:3001` via Vite config.
 cd backend && npm run seed
 ```
 
-This creates all albums, puzzles, pieces (with star ratings), and an initial **admin** user (`admin` / `admin`).
+This creates all albums, puzzles, pieces (with star ratings), and an initial **admin** user (`admin` / `admin`). You will be prompted to set a new password on first login.
 
 ## Deployment (Railway)
 
@@ -118,5 +118,6 @@ cp data/tundra-backup.db data/tundra.db
 |---|---|---|
 | `PORT` | Server port | `3001` |
 | `DATABASE_PATH` | Path to SQLite database file | `./data/tundra.db` |
-| `JWT_SECRET` | Secret key for JWT tokens | — |
-| `NODE_ENV` | Set to `production` to serve frontend | — |
+| `JWT_SECRET` | Secret key for JWT tokens | - |
+| `NODE_ENV` | Set to `production` to serve frontend | - |
+| `ALLOWED_ORIGIN` | Allowed CORS origin | `http://localhost:5173` |

@@ -240,6 +240,16 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.2</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Security hardening - rate limiting, CORS</li>
+                <li>Error states on all pages - failed requests now show a message</li>
+                <li>Skeleton loaders on all pages</li>
+                <li>Backend performance</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.1</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Bug fix - Albums tab on player page no longer crashes</li>
