@@ -61,7 +61,7 @@ function AppRoutes() {
 
   return (
     <>
-      {auth && <Navbar />}
+      {auth && !auth.force_password_change && <Navbar />}
       <Routes>
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
@@ -79,7 +79,7 @@ function AppRoutes() {
         <Route path="/activity" element={<PrivateRoute><AdminRoute><Activity /></AdminRoute></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Footer />
+      {auth && !auth.force_password_change && <Footer />}
     </>
   );
 }
