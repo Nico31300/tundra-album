@@ -255,6 +255,15 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.1</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Bug fix - push notifications automatically re-enabled</li>
+                <li>User Menu redesign</li>
+                <li>Home dashboard — choose which cards to display in settings</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.0</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Available for trade page - see all pieces currently offered as duplicates, grouped by album and puzzle, with links to each provider</li>
