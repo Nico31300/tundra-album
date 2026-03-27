@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useFetch } from '../hooks/useFetch';
 
 function Skeleton() {
   return (
@@ -19,35 +20,20 @@ const STATUS_COLORS = {
 export default function Home() {
   const { auth } = useAuth();
   const navigate = useNavigate();
-  const [albums, setAlbums] = useState(null);
-  const [users, setUsers] = useState(null);
-  const [matches, setMatches] = useState(null);
-  const [missions, setMissions] = useState(null);
-  const [activitySummary, setActivitySummary] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const headers = { Authorization: `Bearer ${auth.token}` };
+  const { data: albums, refetch: refetchAlbums } = useFetch('/api/albums', auth.token);
+  const { data: users, refetch: refetchUsers } = useFetch('/api/users', auth.token);
+  const { data: matches, refetch: refetchMatches } = useFetch('/api/users/matches', auth.token);
+  const { data: missions, refetch: refetchMissions } = useFetch('/api/missions', auth.token);
+  const { data: activitySummary, refetch: refetchActivity } = useFetch('/api/activity/summary', auth.token);
 
   useEffect(() => {
     const handler = () => {
-      setAlbums(null);
-      setUsers(null);
-      setMatches(null);
-      setMissions(null);
-      setActivitySummary(null);
-      setRefreshKey(k => k + 1);
+      refetchAlbums(); refetchUsers(); refetchMatches(); refetchMissions(); refetchActivity();
     };
     window.addEventListener('home-refresh', handler);
     return () => window.removeEventListener('home-refresh', handler);
   }, []);
-
-  useEffect(() => {
-    fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
-    fetch('/api/users', { headers }).then(r => r.json()).then(setUsers);
-    fetch('/api/users/matches', { headers }).then(r => r.json()).then(setMatches);
-    fetch('/api/missions', { headers }).then(r => r.json()).then(setMissions);
-    fetch('/api/activity/summary', { headers }).then(r => r.json()).then(setActivitySummary);
-  }, [auth.token, refreshKey]);
 
   const totalPieces = albums?.reduce((sum, a) => sum + (a.stats?.total ?? 0), 0) ?? 0;
   const totalOwned = albums?.reduce((sum, a) => sum + (a.stats?.have ?? 0) + (a.stats?.have_duplicate ?? 0), 0) ?? 0;

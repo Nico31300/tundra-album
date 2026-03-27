@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
+import { useFetch } from '../hooks/useFetch';
 import { Link } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -232,20 +233,19 @@ function playerMatchesSearch(player, q) {
 
 export default function Matches() {
   const { auth } = useAuth();
-  const [data, setData] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { data, error, refetch } = useFetch('/api/users/matches', auth.token);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('alliance');
 
-  const load = useCallback(() => {
-    setData(null);
-    fetch('/api/users/matches', {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    }).then(r => r.json()).then(setData);
-  }, [auth.token, refreshKey]);
-
-  useEffect(() => { load(); }, [load]);
+  if (error) {
+    return (
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
+        <h2 style={{ marginBottom: 24 }}>My Matches</h2>
+        <div style={{ color: '#f87171', fontSize: 14 }}>{error}</div>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -280,7 +280,7 @@ export default function Matches() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0 }}>My Matches</h2>
         <button
-          onClick={() => setRefreshKey(k => k + 1)}
+          onClick={refetch}
           title="Refresh"
           style={{
             marginLeft: 'auto', background: 'none', border: '1px solid #334155',

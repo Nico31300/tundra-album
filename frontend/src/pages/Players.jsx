@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
+import { useFetch } from '../hooks/useFetch';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
@@ -24,14 +25,8 @@ function SkeletonUserList() {
 
 export default function Players() {
   const { auth } = useAuth();
-  const [users, setUsers] = useState(null);
+  const { data: users, error } = useFetch('/api/users', auth.token);
   const [showOtherAlliances, setShowOtherAlliances] = useState(false);
-
-  const headers = { Authorization: `Bearer ${auth.token}` };
-
-  useEffect(() => {
-    fetch('/api/users', { headers }).then(r => r.json()).then(setUsers);
-  }, [auth.token]);
 
   const byRecent = (a, b) => (b.last_updated ?? '').localeCompare(a.last_updated ?? '');
   const allianceMembers = users?.filter(u => u.sameAlliance).sort(byRecent) ?? [];
@@ -40,8 +35,8 @@ export default function Players() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ marginBottom: 20 }}>Players</h2>
-
-      {users === null && <SkeletonUserList />}
+      {error && <div style={{ color: '#f87171', marginBottom: 16, fontSize: 14 }}>{error}</div>}
+      {users === null && !error && <SkeletonUserList />}
 
       {users !== null && users.length === 0 && (
         <div style={{ color: '#64748b', fontSize: 14 }}>No players yet.</div>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useFetch } from '../hooks/useFetch';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -33,17 +34,12 @@ function recomputeTask(t, milestones) {
 
 export default function Missions() {
   const { auth } = useAuth();
-  const [data, setData] = useState(null);
+  const { data, error, setData } = useFetch('/api/missions', auth.token);
+  const headers = { Authorization: `Bearer ${auth.token}` };
   const [albumFilter, setAlbumFilter] = useState('All');
   const [showCompleted, setShowCompleted] = useState(false);
   const [completing, setCompleting] = useState(null);
   const [resetting, setResetting] = useState(null);
-
-  const headers = { Authorization: `Bearer ${auth.token}` };
-
-  useEffect(() => {
-    fetch('/api/missions', { headers }).then(r => r.json()).then(setData);
-  }, [auth.token]);
 
   const updateTask = (milestoneId, completed) => {
     setData(prev => {
@@ -146,7 +142,8 @@ export default function Missions() {
 
       </div>
 
-      {!data && (
+      {error && <div style={{ color: '#f87171', marginBottom: 16, fontSize: 14 }}>{error}</div>}
+      {!data && !error && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '10px 14px' }}>

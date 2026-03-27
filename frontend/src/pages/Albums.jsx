@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useFetch } from '../hooks/useFetch';
 
 const STATUS_COLORS = {
   need: '#f59e0b',
@@ -18,17 +18,12 @@ function SkeletonCard() {
 
 export default function Albums() {
   const { auth } = useAuth();
-  const [albums, setAlbums] = useState(null);
-
-  const headers = { Authorization: `Bearer ${auth.token}` };
-
-  useEffect(() => {
-    fetch('/api/albums', { headers }).then(r => r.json()).then(setAlbums);
-  }, [auth.token]);
+  const { data: albums, error } = useFetch('/api/albums', auth.token);
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ marginBottom: 20 }}>My Albums</h2>
+      {error && <div style={{ color: '#f87171', marginBottom: 16, fontSize: 14 }}>{error}</div>}
       <div className="grid-3" style={{ gridAutoRows: '1fr' }}>
         {albums === null && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         {albums?.map(album => {

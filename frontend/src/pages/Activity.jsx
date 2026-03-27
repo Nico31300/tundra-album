@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useFetch } from '../hooks/useFetch';
 import { useAuth } from '../context/AuthContext';
 import { formatRelative } from '../utils/formatRelative';
 
@@ -30,24 +31,16 @@ const ACTION_BADGE = {
 
 export default function Activity() {
   const { auth } = useAuth();
-  const [data, setData] = useState(null);
-  const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    const headers = { Authorization: `Bearer ${auth.token}` };
-    fetch('/api/activity/users', { headers }).then(r => r.json()).then(setUsers);
-  }, [auth.token]);
+  const { data: usersData } = useFetch('/api/activity/users', auth.token);
+  const users = usersData ?? [];
 
-  useEffect(() => {
-    setData(null);
-    const headers = { Authorization: `Bearer ${auth.token}` };
-    const params = new URLSearchParams({ page, category: filter });
-    if (userFilter) params.set('username', userFilter);
-    fetch(`/api/activity?${params}`, { headers }).then(r => r.json()).then(setData);
-  }, [auth.token, page, filter, userFilter]);
+  const activityParams = new URLSearchParams({ page, category: filter });
+  if (userFilter) activityParams.set('username', userFilter);
+  const { data, error } = useFetch(`/api/activity?${activityParams}`, auth.token);
 
   function changeFilter(key) { setFilter(key); setPage(1); }
   function changeUserFilter(u) { setUserFilter(u); setPage(1); }
@@ -58,6 +51,7 @@ export default function Activity() {
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '24px 16px' }}>
       <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Recent Activity</h1>
+      {error && <div style={{ color: '#f87171', marginBottom: 16, fontSize: 14 }}>{error}</div>}
 
       {/* Filter bar */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>

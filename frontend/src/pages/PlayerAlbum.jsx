@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useFetch } from '../hooks/useFetch';
 import { formatRelative } from '../utils/formatRelative';
 
 const STATUS_COLORS = {
@@ -18,14 +18,9 @@ const STATUS_LABELS = {
 export default function PlayerAlbum() {
   const { userId, albumId } = useParams();
   const { auth } = useAuth();
-  const [data, setData] = useState(null);
+  const { data, error } = useFetch(`/api/users/${userId}/albums/${albumId}`, auth.token);
 
-  useEffect(() => {
-    fetch(`/api/users/${userId}/albums/${albumId}`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    }).then(r => r.json()).then(setData);
-  }, [userId, albumId]);
-
+  if (error) return <div style={{ padding: 32, color: '#f87171' }}>{error}</div>;
   if (!data) return <div style={{ padding: 32 }}>Loading...</div>;
 
   const { user, album } = data;
