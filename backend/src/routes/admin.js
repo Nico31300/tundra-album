@@ -23,7 +23,9 @@ router.put('/users/:id', (req, res) => {
   const { username, alliance, password, role } = req.body;
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
-  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (username && username.length > 30) return res.status(400).json({ error: 'Username must be 30 characters or less' });
+  if (alliance && alliance.length > 50) return res.status(400).json({ error: 'Alliance must be 50 characters or less' });
 
   try {
     if (password) {

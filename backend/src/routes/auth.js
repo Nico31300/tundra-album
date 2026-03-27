@@ -20,6 +20,8 @@ router.post('/register', (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
+  if (username.length > 30) return res.status(400).json({ error: 'Username must be 30 characters or less' });
+  if (alliance && alliance.length > 50) return res.status(400).json({ error: 'Alliance must be 50 characters or less' });
   const hash = bcrypt.hashSync(password, 10);
   try {
     const result = db.prepare(
@@ -54,6 +56,8 @@ router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res
   if (!username || !username.trim()) {
     return res.status(400).json({ error: 'Username is required' });
   }
+  if (username.trim().length > 30) return res.status(400).json({ error: 'Username must be 30 characters or less' });
+  if (alliance && alliance.trim().length > 50) return res.status(400).json({ error: 'Alliance must be 50 characters or less' });
 
   try {
     const before = db.prepare('SELECT username, alliance FROM users WHERE id = ?').get(userId);
