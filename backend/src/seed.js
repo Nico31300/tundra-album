@@ -295,6 +295,6 @@ console.log(
 
 const passwordHash = bcrypt.hashSync("admin", 10);
 db.prepare(
-  "INSERT INTO users (username, password_hash, role_id) VALUES (?, ?, 1)",
+  "INSERT INTO users (username, password_hash, role_id, force_password_change) VALUES (?, ?, 1, 1)",
 ).run("admin", passwordHash);
-console.log("Created admin user (username: admin, password: admin).");
+console.log("Created admin user (username: admin, password: admin) — password change required on first login.");

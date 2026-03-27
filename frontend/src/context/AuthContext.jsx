@@ -8,7 +8,8 @@ export function AuthProvider({ children }) {
     const username = localStorage.getItem('username');
     const alliance = localStorage.getItem('alliance');
     const role = localStorage.getItem('role') || 'user';
-    return token ? { token, username, alliance, role } : null;
+    const force_password_change = localStorage.getItem('force_password_change') === 'true';
+    return token ? { token, username, alliance, role, force_password_change } : null;
   });
 
   function login(data) {
@@ -16,6 +17,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('username', data.username);
     localStorage.setItem('alliance', data.alliance || '');
     localStorage.setItem('role', data.role || 'user');
+    localStorage.setItem('force_password_change', data.force_password_change ? 'true' : 'false');
     setAuth(data);
   }
 
@@ -24,6 +26,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('username', data.username);
     localStorage.setItem('alliance', data.alliance || '');
     localStorage.setItem('role', data.role || 'user');
+    localStorage.setItem('force_password_change', data.force_password_change ? 'true' : 'false');
     setAuth(data);
   }
 

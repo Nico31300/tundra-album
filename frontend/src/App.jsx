@@ -17,10 +17,13 @@ import Matches from './pages/Matches';
 import Admin from './pages/Admin';
 import Missions from './pages/Missions';
 import Activity from './pages/Activity';
+import ChangePassword from './pages/ChangePassword';
 
-function PrivateRoute({ children }) {
+function PrivateRoute({ children, skipForceCheck = false }) {
   const { auth } = useAuth();
-  return auth ? children : <Navigate to="/login" replace />;
+  if (!auth) return <Navigate to="/login" replace />;
+  if (!skipForceCheck && auth.force_password_change) return <Navigate to="/change-password" replace />;
+  return children;
 }
 
 function PublicRoute({ children }) {
@@ -62,6 +65,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/change-password" element={<PrivateRoute skipForceCheck><ChangePassword /></PrivateRoute>} />
         <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
         <Route path="/albums" element={<PrivateRoute><Albums /></PrivateRoute>} />
         <Route path="/albums/:albumId" element={<PrivateRoute><Album /></PrivateRoute>} />

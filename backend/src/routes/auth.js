@@ -44,7 +44,7 @@ router.post('/login', loginLimiter, (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token, username: user.username, alliance: user.alliance, role: user.role });
+  res.json({ token, username: user.username, alliance: user.alliance, role: user.role, force_password_change: !!user.force_password_change });
 });
 
 router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res) => {
@@ -80,6 +80,18 @@ router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res
     }
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+router.post('/change-password', require('../middleware/auth').authMiddleware, (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+  const hash = bcrypt.hashSync(password, 10);
+  db.prepare('UPDATE users SET password_hash = ?, force_password_change = 0 WHERE id = ?').run(hash, req.user.id);
+  const updated = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?').get(req.user.id);
+  const token = jwt.sign({ id: updated.id, username: updated.username, role: updated.role }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role, force_password_change: false });
 });
 
 module.exports = router;
