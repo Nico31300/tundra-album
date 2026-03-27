@@ -103,6 +103,9 @@ db.exec(`
 try {
   db.exec('ALTER TABLE users ADD COLUMN force_password_change INTEGER NOT NULL DEFAULT 0');
 } catch {}
+try {
+  db.exec('ALTER TABLE users ADD COLUMN last_notified_at DATETIME');
+} catch {}
 
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'admin')`).run();
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'stars_editor')`).run();

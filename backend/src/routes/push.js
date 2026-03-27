@@ -96,4 +96,48 @@ router.post('/notify/:userId', authMiddleware, (req, res) => {
   Promise.all(sends).then(() => res.json({ ok: true, sent: subscriptions.length }));
 });
 
+// Batch scheduler: notify users about new available pieces
+function sendBatchAvailabilityNotifications() {
+  const usersToNotify = db.prepare(`
+    SELECT u.id, COUNT(DISTINCT i_other.piece_id) AS new_count
+    FROM users u
+    JOIN push_subscriptions ps ON ps.user_id = u.id
+    JOIN inventory i_me ON i_me.user_id = u.id AND i_me.status = 'need'
+    JOIN inventory i_other
+      ON i_other.piece_id = i_me.piece_id
+      AND i_other.user_id != u.id
+      AND i_other.status = 'have_duplicate'
+      AND i_other.updated_at > COALESCE(u.last_notified_at, datetime('now', '-2 hours'))
+    GROUP BY u.id
+    HAVING new_count > 0
+  `).all();
+  
+  for (const user of usersToNotify) {
+    const subs = db.prepare('SELECT * FROM push_subscriptions WHERE user_id = ?').all(user.id);
+    const count = user.new_count;
+    const payload = JSON.stringify({
+      title: 'New pieces available',
+      body: `${count} piece${count > 1 ? 's' : ''} you're looking for ${count > 1 ? 'are' : 'is'} now available as duplicate`,
+      url: '/available',
+    });
+    for (const sub of subs) {
+      webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+        payload
+      ).catch(err => {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          db.prepare('DELETE FROM push_subscriptions WHERE endpoint = ?').run(sub.endpoint);
+        }
+      });
+    }
+  }
+
+  // Advance watermark for all subscribed users so next run only catches truly new pieces
+  db.prepare(`
+    UPDATE users SET last_notified_at = datetime('now')
+    WHERE id IN (SELECT DISTINCT user_id FROM push_subscriptions)
+  `).run();
+}
+
 module.exports = router;
+module.exports.sendBatchAvailabilityNotifications = sendBatchAvailabilityNotifications;

@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/admin');
 const missionsRoutes = require('./routes/missions');
 const activityRoutes = require('./routes/activity');
 const pushRoutes = require('./routes/push');
+const { sendBatchAvailabilityNotifications } = require('./routes/push');
 
 const db = require('./database');
 
@@ -26,6 +27,7 @@ function purgeOldActivityLogs() {
 }
 purgeOldActivityLogs();
 setInterval(purgeOldActivityLogs, 24 * 60 * 60 * 1000);
+setInterval(sendBatchAvailabilityNotifications, 2 * 60 * 60 * 1000);
 
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 

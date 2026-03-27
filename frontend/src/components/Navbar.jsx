@@ -148,6 +148,18 @@ export default function Navbar() {
                 )}
               </div>
               <Link
+                to="/available"
+                onClick={() => setAvatarOpen(false)}
+                style={{
+                  display: 'block', padding: '10px 16px', fontSize: 13,
+                  color: '#e2e8f0', borderBottom: '1px solid #334155',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                onMouseLeave={e => e.currentTarget.style.background = ''}
+              >
+                Available for trade
+              </Link>
+              <Link
                 to="/settings"
                 onClick={() => setAvatarOpen(false)}
                 style={{
