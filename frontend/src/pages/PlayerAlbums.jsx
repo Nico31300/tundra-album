@@ -143,7 +143,7 @@ export default function PlayerAlbums() {
       )}
 
       {view === 'matches' && (
-        <MatchesView matches={matches} error={matchesError} username={user.username} targetUserId={userId} token={auth.token} highlightedPieceId={highlightedPieceId} />
+        <MatchesView matches={matches} error={matchesError} username={user.username} highlightedPieceId={highlightedPieceId} />
       )}
     </div>
   );
@@ -216,7 +216,7 @@ function PieceTile({ piece, onClick, copied }) {
   );
 }
 
-function MatchSection({ title, color, albums, username, messageIntro, targetUserId, token, section, highlightedPieceId }) {
+function MatchSection({ title, color, albums, username, messageIntro, section, highlightedPieceId }) {
   const [copiedId, setCopiedId] = useState(null);
   const pieceRefs = useRef({});
 
@@ -242,20 +242,6 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
     }
     setCopiedId(piece.piece_id);
     setTimeout(() => setCopiedId(null), 300);
-
-    fetch(`/api/push/notify/${targetUserId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        pieceName: piece.piece_name,
-        puzzleName: piece.puzzle_name,
-        albumName,
-        section,
-        pieceId: piece.piece_id,
-        puzzleId: piece.puzzle_id,
-        albumId: piece.album_id,
-      }),
-    });
   }
 
   return (
@@ -296,7 +282,7 @@ function MatchSection({ title, color, albums, username, messageIntro, targetUser
   );
 }
 
-function MatchesView({ matches, error, username, targetUserId, token, highlightedPieceId }) {
+function MatchesView({ matches, error, username, highlightedPieceId }) {
   if (error) return <div style={{ color: '#f87171', fontSize: 14 }}>{error}</div>;
   if (!matches) return <div style={{ color: '#475569', fontSize: 14 }}>Loading…</div>;
 
@@ -311,8 +297,6 @@ function MatchesView({ matches, error, username, targetUserId, token, highlighte
         albums={theyCanGiveAlbums}
         username={username}
         messageIntro="I'm looking for a puzzle piece:"
-        targetUserId={targetUserId}
-        token={token}
         section="theyCanGive"
         highlightedPieceId={highlightedPieceId}
       />
@@ -322,8 +306,6 @@ function MatchesView({ matches, error, username, targetUserId, token, highlighte
         albums={iCanGiveAlbums}
         username={username}
         messageIntro="Got a puzzle piece you might need:"
-        targetUserId={targetUserId}
-        token={token}
         section="iCanGive"
         highlightedPieceId={highlightedPieceId}
       />
