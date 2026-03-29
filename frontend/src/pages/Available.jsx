@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFetch } from '../hooks/useFetch';
 
@@ -33,7 +33,10 @@ function SkeletonAvailable() {
 
 export default function Available() {
   const { auth } = useAuth();
-  const { data: albums, loading, error } = useFetch('/api/pieces/available', auth.token);
+  const [searchParams] = useSearchParams();
+  const since = searchParams.get('since');
+  const apiUrl = since ? `/api/pieces/available?since=${encodeURIComponent(since)}` : '/api/pieces/available';
+  const { data: albums, loading, error } = useFetch(apiUrl, auth.token);
 
   const totalPieces = albums?.reduce((sum, a) => sum + a.puzzles.reduce((s, p) => s + p.pieces.length, 0), 0) ?? 0;
 
@@ -49,13 +52,20 @@ export default function Available() {
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Available for trade</h1>
-        {totalPieces > 0 && (
-          <span style={{ fontSize: 13, color: '#64748b' }}>
-            {totalPieces} piece{totalPieces > 1 ? 's' : ''} you need
-          </span>
-        )}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
+          {since ? 'Nouvelles pièces disponibles' : 'Available for trade'}
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 4 }}>
+          {since && (
+            <span style={{ fontSize: 12, color: '#64748b' }}>Depuis votre dernière notification</span>
+          )}
+          {totalPieces > 0 && (
+            <span style={{ fontSize: 13, color: '#64748b' }}>
+              {totalPieces} pièce{totalPieces > 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
       </div>
 
       {albums.length === 0 ? (
@@ -63,7 +73,9 @@ export default function Available() {
           background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10,
           padding: 32, textAlign: 'center', color: '#64748b', fontSize: 14,
         }}>
-          No pieces you're looking for are currently available as duplicates.
+          {since
+            ? 'Aucune nouvelle pièce depuis votre dernière notification.'
+            : "No pieces you're looking for are currently available as duplicates."}
         </div>
       ) : (
         albums.map(album => (

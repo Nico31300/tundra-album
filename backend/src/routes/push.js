@@ -57,7 +57,8 @@ function sendBatchAvailabilityNotifications() {
   console.log('[push] Batch availability check started');
 
   const usersToNotify = db.prepare(`
-    SELECT u.id, COUNT(DISTINCT i_other.piece_id) AS new_count
+    SELECT u.id, COUNT(DISTINCT i_other.piece_id) AS new_count,
+      COALESCE(u.last_notified_at, datetime('now', '-2 hours')) AS since_ts
     FROM users u
     JOIN push_subscriptions ps ON ps.user_id = u.id
     JOIN inventory i_me ON i_me.user_id = u.id AND i_me.status = 'need'
@@ -82,7 +83,7 @@ function sendBatchAvailabilityNotifications() {
     const payload = JSON.stringify({
       title: 'New pieces available',
       body: `${count} piece${count > 1 ? 's' : ''} you're looking for ${count > 1 ? 'are' : 'is'} now available as duplicate`,
-      url: '/available',
+      url: `/available?since=${encodeURIComponent(user.since_ts)}`,
     });
     for (const sub of subs) {
       webpush.sendNotification(

@@ -6,6 +6,10 @@ const router = express.Router();
 
 // GET /api/pieces/available — pieces the current user needs that someone else has as duplicate
 router.get('/available', authMiddleware, (req, res) => {
+  const { since } = req.query;
+  const sinceClause = since ? 'AND i_other.updated_at > ?' : '';
+  const params = since ? [req.user.id, since] : [req.user.id];
+
   const rows = db.prepare(`
     SELECT
       p.id        AS piece_id,
@@ -32,8 +36,9 @@ router.get('/available', authMiddleware, (req, res) => {
     WHERE i_me.user_id = ?
       AND i_me.status = 'need'
       AND i_other.status = 'have_duplicate'
+      ${sinceClause}
     ORDER BY a.position, puz.position, p.position
-  `).all(req.user.id);
+  `).all(...params);
 
   // Group into albums → puzzles → pieces with provider arrays
   const albumMap = new Map();
