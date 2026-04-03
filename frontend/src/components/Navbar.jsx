@@ -266,7 +266,7 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.3</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.3 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Apr 3, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Performance — reduced latency when switching back to the app on iOS</li>
                 <li>App updates now apply automatically without needing to close and reopen</li>
@@ -274,7 +274,7 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.2</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.2 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Apr 3, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>In-game name — set a display name separate from your login username in Settings</li>
                 <li>Admin panel now shows both username and in-game name, with edit support for both</li>
@@ -282,7 +282,7 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.1</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.1 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 27, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Bug fix - push notifications automatically re-enabled</li>
                 <li>User Menu redesign</li>
@@ -291,7 +291,7 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.0</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.0 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 27, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Available for trade page - see all pieces currently offered as duplicates, grouped by album and puzzle, with links to each provider</li>
                 <li>Batch push notifications - get notified every 2 hours about pieces you need that have become available</li>
@@ -300,7 +300,7 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.2</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.2 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 27, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Security hardening - rate limiting, CORS</li>
                 <li>Error states on all pages - failed requests now show a message</li>
@@ -310,14 +310,14 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.1</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.1 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 27, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Bug fix - Albums tab on player page no longer crashes</li>
               </ul>
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.0</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.0 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 26, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Matches page overhaul - filter by "Can give you" or "Needs from you", sort by last activity, search by puzzle name, collapsible cards, mutual match highlight, refresh button, and navigate to player pages directly from a match card</li>
                 <li>Skeleton loaders on all main pages while data loads</li>
@@ -326,14 +326,14 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.4.0</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.4.0 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 25, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Push notifications - get notified when someone clicks a piece on your player page</li>
               </ul>
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.1</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.1 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 25, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Security & bug fix</li>
                 <li>Activity log pruning re-enabled - logs older than 7 days are correctly auto-purged daily</li>
@@ -342,7 +342,7 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.0</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.3.0 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 24, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Player page now defaults to a Matches tab - see pieces you can exchange, click to copy message</li>
                 <li>Activity log is now paginated with server-side filters; logs older than 7 days are auto-pruned</li>
@@ -352,7 +352,7 @@ export default function Navbar() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.2.0</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.2.0 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 24, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Activity log - all inventory and admin actions are now tracked</li>
                 <li>Recent Activity card on the home dashboard with a 24-hour summary</li>
