@@ -49,15 +49,24 @@ function UsersTab() {
     fetch('/api/admin/users', { headers }).then(r => r.json()).then(setUsers);
   }, []);
 
+  useEffect(() => {
+    if (!editUser) return;
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') setEditUser(null);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editUser]);
+
   function openEdit(user) {
     setEditUser(user);
-    setForm({ username: user.username, alliance: user.alliance || '', role: user.role, password: '' });
+    setForm({ username: user.username, in_game_name: user.in_game_name || '', alliance: user.alliance || '', role: user.role, password: '' });
     setError('');
   }
 
   async function saveUser() {
     setError('');
-    const body = { username: form.username, alliance: form.alliance, role: form.role };
+    const body = { username: form.username, in_game_name: form.in_game_name, alliance: form.alliance, role: form.role };
     if (form.password) body.password = form.password;
     const res = await fetch(`/api/admin/users/${editUser.id}`, {
       method: 'PUT', headers, body: JSON.stringify(body),
@@ -84,10 +93,18 @@ function UsersTab() {
             <h3 style={{ marginBottom: 16, fontSize: 16 }}>Edit user</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <label style={{ fontSize: 13, color: '#94a3b8' }}>
-                Username
+                Username <span style={{ color: '#475569' }}>(login)</span>
                 <input
                   value={form.username}
                   onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
+                  style={{ display: 'block', width: '100%', marginTop: 4 }}
+                />
+              </label>
+              <label style={{ fontSize: 13, color: '#94a3b8' }}>
+                In game name
+                <input
+                  value={form.in_game_name}
+                  onChange={e => setForm(f => ({ ...f, in_game_name: e.target.value }))}
                   style={{ display: 'block', width: '100%', marginTop: 4 }}
                 />
               </label>
@@ -133,7 +150,7 @@ function UsersTab() {
           <div className="card" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
             <div style={{ fontWeight: 600, marginBottom: 8 }}>Delete user</div>
             <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 20 }}>
-              Delete <strong>{deleteConfirm.username}</strong> and all their inventory? This cannot be undone.
+              Delete <strong>{deleteConfirm.in_game_name}</strong> and all their inventory? This cannot be undone.
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
               <button className="btn-ghost" onClick={() => setDeleteConfirm(null)}>Cancel</button>
@@ -153,6 +170,7 @@ function UsersTab() {
           <thead>
             <tr style={{ borderBottom: '1px solid #334155', color: '#64748b', textAlign: 'left' }}>
               <th style={{ padding: '8px 12px' }}>Username</th>
+              <th style={{ padding: '8px 12px' }}>In game name</th>
               <th style={{ padding: '8px 12px' }}>Alliance</th>
               <th style={{ padding: '8px 12px' }}>Role</th>
               <th style={{ padding: '8px 12px' }}>Joined</th>
@@ -162,7 +180,7 @@ function UsersTab() {
           <tbody>
             {users === null && Array.from({ length: 4 }).map((_, i) => (
               <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}>
-                {[60, 50, 40, 50, 80].map((w, j) => (
+                {[60, 50, 50, 40, 50, 80].map((w, j) => (
                   <td key={j} style={{ padding: '10px 12px' }}>
                     <div className="skeleton" style={{ height: 12, width: `${w}%` }} />
                   </td>
@@ -172,6 +190,7 @@ function UsersTab() {
             {users?.map(user => (
               <tr key={user.id} style={{ borderBottom: '1px solid #1e293b' }}>
                 <td style={{ padding: '10px 12px', fontWeight: 600 }}>{user.username}</td>
+                <td style={{ padding: '10px 12px', color: '#64748b', fontSize: 12 }}>{user.in_game_name}</td>
                 <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{user.alliance || '—'}</td>
                 <td style={{ padding: '10px 12px' }}>
                   <span style={{

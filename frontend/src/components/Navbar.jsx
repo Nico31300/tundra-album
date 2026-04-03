@@ -140,7 +140,7 @@ export default function Navbar() {
             }}
           >
             <User size={15} style={{ flexShrink: 0 }} />
-            <span className="navbar-desktop" style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{auth.username}</span>
+            <span className="navbar-desktop" style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{auth.in_game_name || auth.username}</span>
             <ChevronDown size={13} style={{ color: '#64748b', transform: avatarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }} />
           </button>
 
@@ -152,7 +152,7 @@ export default function Navbar() {
             }}>
               {/* Header */}
               <div style={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{auth.username}</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{auth.in_game_name || auth.username}</div>
                 {auth.alliance && (
                   <div style={{ color: '#3b82f6', fontSize: 12, marginTop: 2 }}>[{auth.alliance}]</div>
                 )}
@@ -264,6 +264,14 @@ export default function Navbar() {
 
           <div style={{ borderTop: '1px solid #334155', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13, color: '#94a3b8', overflowY: 'auto' }}>
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
+
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.2</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>In-game name — set a display name separate from your login username in Settings</li>
+                <li>Admin panel now shows both username and in-game name, with edit support for both</li>
+              </ul>
+            </div>
 
             <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.1</div>

@@ -26,6 +26,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const [username, setUsername] = useState(auth.username);
   const [alliance, setAlliance] = useState(auth.alliance || '');
+  const [inGameName, setInGameName] = useState(auth.in_game_name || auth.username);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -86,7 +87,7 @@ export default function Settings() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${auth.token}`,
       },
-      body: JSON.stringify({ username, alliance }),
+      body: JSON.stringify({ username, alliance, in_game_name: inGameName }),
     });
 
     const data = await res.json();
@@ -133,6 +134,12 @@ export default function Settings() {
               Username
             </label>
             <input value={username} onChange={e => setUsername(e.target.value)} required />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
+              In game name
+            </label>
+            <input value={inGameName} onChange={e => setInGameName(e.target.value)} placeholder={username} />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>

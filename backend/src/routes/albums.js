@@ -76,7 +76,7 @@ router.get('/:albumId/users', authMiddleware, (req, res) => {
   const currentUser = db.prepare('SELECT alliance FROM users WHERE id = ?').get(userId);
 
   const rows = db.prepare(`
-    SELECT u.id, u.username, u.alliance,
+    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance,
            i.piece_id, i.status
     FROM users u
     JOIN inventory i ON i.user_id = u.id
@@ -92,6 +92,7 @@ router.get('/:albumId/users', authMiddleware, (req, res) => {
       byUser[row.id] = {
         id: row.id,
         username: row.username,
+        in_game_name: row.in_game_name,
         alliance: row.alliance,
         sameAlliance: !!(currentUser?.alliance && row.alliance === currentUser.alliance),
         inventory: {},

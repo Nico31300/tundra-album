@@ -156,7 +156,7 @@ function PlayerCard({ player, showAlliance, searchQuery, sortBy }) {
             onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
             onMouseLeave={e => e.currentTarget.style.color = '#e2e8f0'}
           >
-            {player.username}
+            {player.in_game_name}
           </Link>
           {showAlliance && player.alliance && (
             <span style={{ color: '#64748b', fontWeight: 400 }}>[{player.alliance}]</span>
@@ -183,7 +183,7 @@ function PlayerCard({ player, showAlliance, searchQuery, sortBy }) {
             <div style={{ marginBottom: hasICanGive && sortBy !== 'can_give' ? 10 : 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ color: STATUS_COLORS.have_duplicate }}>Can give you:</span>
-                <CopyButton text={buildCanGiveText(player.username, filteredCanGiveMe)} />
+                <CopyButton text={buildCanGiveText(player.in_game_name, filteredCanGiveMe)} />
               </div>
               <div style={{ paddingLeft: 8, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {Object.entries(filteredCanGiveMe).map(([puzzle, pieces]) => (
@@ -200,7 +200,7 @@ function PlayerCard({ player, showAlliance, searchQuery, sortBy }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ color: STATUS_COLORS.need }}>Needs from you:</span>
-                <CopyButton text={buildNeedsText(player.username, filteredICanGive)} />
+                <CopyButton text={buildNeedsText(player.in_game_name, filteredICanGive)} />
               </div>
               <div style={{ paddingLeft: 8, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {Object.entries(filteredICanGive).map(([puzzle, pieces]) => (

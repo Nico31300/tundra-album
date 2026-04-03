@@ -119,7 +119,7 @@ export default function Available() {
                               whiteSpace: 'nowrap',
                             }}
                           >
-                            {p.username}
+                            {p.in_game_name}
                             {p.alliance && (
                               <span style={{ color: '#3b82f6', marginLeft: 4 }}>[{p.alliance}]</span>
                             )}

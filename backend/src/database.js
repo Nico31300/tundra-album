@@ -106,6 +106,9 @@ try {
 try {
   db.exec('ALTER TABLE users ADD COLUMN last_notified_at DATETIME');
 } catch {}
+try {
+  db.exec('ALTER TABLE users ADD COLUMN in_game_name TEXT');
+} catch {}
 
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'admin')`).run();
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'stars_editor')`).run();

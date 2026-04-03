@@ -87,7 +87,7 @@ export default function PlayerAlbums() {
         </div>
         {/* Line 2: username + alliance */}
         <h2 style={{ margin: 0 }}>
-          {user.username}
+          {user.in_game_name}
           {user.alliance && <span style={{ color: '#64748b', fontWeight: 400, fontSize: 16, marginLeft: 8 }}>[{user.alliance}]</span>}
         </h2>
       </div>
@@ -143,7 +143,7 @@ export default function PlayerAlbums() {
       )}
 
       {view === 'matches' && (
-        <MatchesView matches={matches} error={matchesError} username={user.username} highlightedPieceId={highlightedPieceId} />
+        <MatchesView matches={matches} error={matchesError} username={user.in_game_name} highlightedPieceId={highlightedPieceId} />
       )}
     </div>
   );

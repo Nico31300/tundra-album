@@ -24,6 +24,7 @@ router.get('/available', authMiddleware, (req, res) => {
       a.position  AS album_position,
       u.id        AS provider_id,
       u.username  AS provider_username,
+      COALESCE(u.in_game_name, u.username) AS provider_in_game_name,
       u.alliance  AS provider_alliance,
       i_other.updated_at
     FROM inventory i_me
@@ -57,6 +58,7 @@ router.get('/available', authMiddleware, (req, res) => {
     puzzle.pieces.get(row.piece_id).providers.push({
       user_id: row.provider_id,
       username: row.provider_username,
+      in_game_name: row.provider_in_game_name,
       alliance: row.provider_alliance,
       updated_at: row.updated_at,
     });

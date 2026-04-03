@@ -26,12 +26,12 @@ router.get('/summary', authMiddleware, (req, res) => {
 // GET /api/activity/users — all distinct users who have activity logs (admin only)
 router.get('/users', authMiddleware, requireRole('admin'), (req, res) => {
   const users = db.prepare(`
-    SELECT DISTINCT u.username
+    SELECT DISTINCT u.username, COALESCE(u.in_game_name, u.username) AS in_game_name
     FROM activity_logs al
     JOIN users u ON u.id = al.user_id
     ORDER BY u.username
   `).all();
-  res.json(users.map(u => u.username));
+  res.json(users);
 });
 
 const CATEGORY_ACTIONS = {
@@ -69,7 +69,7 @@ router.get('/', authMiddleware, requireRole('admin'), (req, res) => {
   `).get(...params).count;
 
   const logs = db.prepare(`
-    SELECT al.id, al.action, al.label, al.created_at, u.username
+    SELECT al.id, al.action, al.label, al.created_at, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name
     FROM activity_logs al
     JOIN users u ON u.id = al.user_id
     ${where}

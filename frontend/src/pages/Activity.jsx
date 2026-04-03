@@ -91,7 +91,7 @@ export default function Activity() {
         >
           <option value=''>All users</option>
           {users.map(u => (
-            <option key={u} value={u}>{u}</option>
+            <option key={u.username} value={u.username}>{u.in_game_name}</option>
           ))}
         </select>
       </div>
@@ -157,7 +157,7 @@ export default function Activity() {
                 className="activity-row"
               >
                 <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>{formatRelative(log.created_at)}</span>
-                <span className="activity-user" style={{ fontWeight: 500 }}>{log.username}</span>
+                <span className="activity-user" style={{ fontWeight: 500 }}>{log.in_game_name}</span>
                 <span className="activity-badge">
                   <span style={{
                     display: 'inline-block', padding: '2px 8px', borderRadius: 4,

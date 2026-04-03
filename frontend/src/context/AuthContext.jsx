@@ -9,7 +9,8 @@ export function AuthProvider({ children }) {
     const alliance = localStorage.getItem('alliance');
     const role = localStorage.getItem('role') || 'user';
     const force_password_change = localStorage.getItem('force_password_change') === 'true';
-    return token ? { token, username, alliance, role, force_password_change } : null;
+    const in_game_name = localStorage.getItem('in_game_name') || username;
+    return token ? { token, username, alliance, role, force_password_change, in_game_name } : null;
   });
 
   function login(data) {
@@ -18,7 +19,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('alliance', data.alliance || '');
     localStorage.setItem('role', data.role || 'user');
     localStorage.setItem('force_password_change', data.force_password_change ? 'true' : 'false');
-    setAuth(data);
+    localStorage.setItem('in_game_name', data.in_game_name || data.username);
+    setAuth({ ...data, in_game_name: data.in_game_name || data.username });
   }
 
   function updateAuth(data) {
@@ -27,7 +29,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('alliance', data.alliance || '');
     localStorage.setItem('role', data.role || 'user');
     localStorage.setItem('force_password_change', data.force_password_change ? 'true' : 'false');
-    setAuth(data);
+    localStorage.setItem('in_game_name', data.in_game_name || data.username);
+    setAuth({ ...data, in_game_name: data.in_game_name || data.username });
   }
 
   function logout() {

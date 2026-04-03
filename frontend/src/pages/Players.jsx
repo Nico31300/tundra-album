@@ -104,7 +104,7 @@ function UserList({ users, showAlliance = false }) {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, gap: 6 }}>
               <div style={{ fontWeight: 600 }}>
-                {user.username}
+                {user.in_game_name}
                 {showAlliance && user.alliance && (
                   <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>[{user.alliance}]</span>
                 )}

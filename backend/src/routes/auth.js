@@ -25,12 +25,12 @@ router.post('/register', (req, res) => {
   const hash = bcrypt.hashSync(password, 10);
   try {
     const result = db.prepare(
-      'INSERT INTO users (username, password_hash, alliance) VALUES (?, ?, ?)'
-    ).run(username, hash, alliance || null);
+      'INSERT INTO users (username, password_hash, alliance, in_game_name) VALUES (?, ?, ?, ?)'
+    ).run(username, hash, alliance || null, username);
     db.prepare(`INSERT INTO activity_logs (user_id, action, label) VALUES (?, 'user_created', ?)`)
       .run(result.lastInsertRowid, `${username} joined`);
     const token = jwt.sign({ id: result.lastInsertRowid, username, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, username, alliance: alliance || null, role: 'user' });
+    res.json({ token, username, alliance: alliance || null, role: 'user', in_game_name: username });
   } catch (e) {
     if (e.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Username already taken' });
@@ -46,11 +46,11 @@ router.post('/login', loginLimiter, (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token, username: user.username, alliance: user.alliance, role: user.role, force_password_change: !!user.force_password_change });
+  res.json({ token, username: user.username, alliance: user.alliance, role: user.role, force_password_change: !!user.force_password_change, in_game_name: user.in_game_name || user.username });
 });
 
 router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res) => {
-  const { username, alliance } = req.body;
+  const { username, alliance, in_game_name } = req.body;
   const userId = req.user.id;
 
   if (!username || !username.trim()) {
@@ -58,12 +58,14 @@ router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res
   }
   if (username.trim().length > 30) return res.status(400).json({ error: 'Username must be 30 characters or less' });
   if (alliance && alliance.trim().length > 50) return res.status(400).json({ error: 'Alliance must be 50 characters or less' });
+  if (in_game_name && in_game_name.trim().length > 30) return res.status(400).json({ error: 'In game name must be 30 characters or less' });
 
   try {
-    const before = db.prepare('SELECT username, alliance FROM users WHERE id = ?').get(userId);
+    const before = db.prepare('SELECT username, alliance, in_game_name FROM users WHERE id = ?').get(userId);
 
-    db.prepare('UPDATE users SET username = ?, alliance = ? WHERE id = ?')
-      .run(username.trim(), alliance?.trim() || null, userId);
+    const resolvedInGameName = in_game_name?.trim() || username.trim();
+    db.prepare('UPDATE users SET username = ?, alliance = ?, in_game_name = ? WHERE id = ?')
+      .run(username.trim(), alliance?.trim() || null, resolvedInGameName, userId);
 
     const updated = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?').get(userId);
 
@@ -77,7 +79,7 @@ router.patch('/profile', require('../middleware/auth').authMiddleware, (req, res
     }
 
     const token = jwt.sign({ id: updated.id, username: updated.username, role: updated.role }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role });
+    res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role, in_game_name: updated.in_game_name });
   } catch (e) {
     if (e.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Username already taken' });
@@ -95,7 +97,7 @@ router.post('/change-password', require('../middleware/auth').authMiddleware, (r
   db.prepare('UPDATE users SET password_hash = ?, force_password_change = 0 WHERE id = ?').run(hash, req.user.id);
   const updated = db.prepare('SELECT u.*, r.name as role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?').get(req.user.id);
   const token = jwt.sign({ id: updated.id, username: updated.username, role: updated.role }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role, force_password_change: false });
+  res.json({ token, username: updated.username, alliance: updated.alliance, role: updated.role, force_password_change: false, in_game_name: updated.in_game_name || updated.username });
 });
 
 module.exports = router;

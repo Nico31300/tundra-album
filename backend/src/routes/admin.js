@@ -10,7 +10,7 @@ router.use(authMiddleware, requireRole('admin'));
 // GET /api/admin/users
 router.get('/users', (req, res) => {
   const users = db.prepare(`
-    SELECT u.id, u.username, u.alliance, u.created_at, r.name as role
+    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance, u.created_at, r.name as role
     FROM users u JOIN roles r ON r.id = u.role_id
     ORDER BY u.id
   `).all();
@@ -20,11 +20,12 @@ router.get('/users', (req, res) => {
 // PUT /api/admin/users/:id
 router.put('/users/:id', (req, res) => {
   const { id } = req.params;
-  const { username, alliance, password, role } = req.body;
+  const { username, in_game_name, alliance, password, role } = req.body;
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
   if (!user) return res.status(404).json({ error: 'User not found' });
   if (username && username.length > 30) return res.status(400).json({ error: 'Username must be 30 characters or less' });
+  if (in_game_name && in_game_name.length > 30) return res.status(400).json({ error: 'In game name must be 30 characters or less' });
   if (alliance && alliance.length > 50) return res.status(400).json({ error: 'Alliance must be 50 characters or less' });
 
   try {
@@ -36,13 +37,14 @@ router.put('/users/:id', (req, res) => {
     db.prepare(`
       UPDATE users SET
         username = COALESCE(?, username),
+        in_game_name = COALESCE(?, in_game_name),
         alliance = ?,
         role_id = COALESCE(?, role_id)
       WHERE id = ?
-    `).run(username || null, alliance !== undefined ? (alliance || null) : user.alliance, roleRow?.id ?? null, id);
+    `).run(username || null, in_game_name || null, alliance !== undefined ? (alliance || null) : user.alliance, roleRow?.id ?? null, id);
 
     const updated = db.prepare(`
-      SELECT u.id, u.username, u.alliance, u.created_at, r.name as role
+      SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance, u.created_at, r.name as role
       FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?
     `).get(id);
 

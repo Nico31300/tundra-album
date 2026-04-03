@@ -10,7 +10,7 @@ router.get('/', authMiddleware, (req, res) => {
   const currentUser = db.prepare('SELECT alliance FROM users WHERE id = ?').get(userId);
 
   const rows = db.prepare(`
-    SELECT u.id, u.username, u.alliance,
+    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance,
            SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
            SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate,
            MAX(i.updated_at) AS last_updated,
@@ -35,7 +35,7 @@ router.get('/matches', authMiddleware, (req, res) => {
 
   // Rows where other users have_duplicate pieces I need
   const canGiveMeRows = db.prepare(`
-    SELECT u.id, u.username, u.alliance,
+    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance,
            p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name,
            (SELECT MAX(updated_at) FROM inventory WHERE user_id = u.id) AS last_updated
     FROM users u
@@ -49,7 +49,7 @@ router.get('/matches', authMiddleware, (req, res) => {
 
   // Rows where other users need pieces I have_duplicate
   const iCanGiveRows = db.prepare(`
-    SELECT u.id, u.username, u.alliance,
+    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance,
            p.id AS piece_id, p.name AS piece_name, pz.name AS puzzle_name, a.name AS album_name,
            (SELECT MAX(updated_at) FROM inventory WHERE user_id = u.id) AS last_updated
     FROM users u
@@ -68,6 +68,7 @@ router.get('/matches', authMiddleware, (req, res) => {
       playerMap[row.id] = {
         id: row.id,
         username: row.username,
+        in_game_name: row.in_game_name,
         alliance: row.alliance,
         sameAlliance: !!(currentUser?.alliance && row.alliance === currentUser.alliance),
         last_updated: row.last_updated,
@@ -104,7 +105,7 @@ router.get('/:userId/matches', authMiddleware, (req, res) => {
   const { userId } = req.params;
   const currentUserId = req.user.id;
 
-  const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT id, username, COALESCE(in_game_name, username) AS in_game_name, alliance FROM users WHERE id = ?').get(userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   // Pieces I can give them: I have_duplicate, they need
@@ -142,7 +143,7 @@ router.get('/:userId/matches', authMiddleware, (req, res) => {
 router.get('/:userId/albums', authMiddleware, (req, res) => {
   const { userId } = req.params;
 
-  const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT id, username, COALESCE(in_game_name, username) AS in_game_name, alliance FROM users WHERE id = ?').get(userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const albums = db.prepare('SELECT * FROM albums ORDER BY position').all();
@@ -187,7 +188,7 @@ router.get('/:userId/albums/:albumId', authMiddleware, (req, res) => {
   const { userId, albumId } = req.params;
   const currentUserId = req.user.id;
 
-  const user = db.prepare('SELECT id, username, alliance FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT id, username, COALESCE(in_game_name, username) AS in_game_name, alliance FROM users WHERE id = ?').get(userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const album = db.prepare('SELECT * FROM albums WHERE id = ?').get(albumId);
