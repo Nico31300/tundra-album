@@ -266,6 +266,14 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.3</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Performance — reduced latency when switching back to the app on iOS</li>
+                <li>App updates now apply automatically without needing to close and reopen</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.2</div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>In-game name — set a display name separate from your login username in Settings</li>
