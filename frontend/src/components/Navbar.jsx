@@ -268,7 +268,7 @@ export default function Navbar() {
             <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.3 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Apr 3, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
-                <li>Performance — reduced latency when switching back to the app on iOS</li>
+                <li>Performance: Reduced latency when switching back to the app on iOS</li>
                 <li>App updates now apply automatically without needing to close and reopen</li>
               </ul>
             </div>
@@ -276,7 +276,7 @@ export default function Navbar() {
             <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.2 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Apr 3, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
-                <li>In-game name — set a display name separate from your login username in Settings</li>
+                <li>In-game name: Set a display name separate from your login username in Settings</li>
                 <li>Admin panel now shows both username and in-game name, with edit support for both</li>
               </ul>
             </div>
@@ -286,7 +286,7 @@ export default function Navbar() {
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Bug fix - push notifications automatically re-enabled</li>
                 <li>User Menu redesign</li>
-                <li>Home dashboard — choose which cards to display in settings</li>
+                <li>Home dashboard: Choose which cards to display in settings</li>
               </ul>
             </div>
 
