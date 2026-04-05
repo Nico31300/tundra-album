@@ -1,7 +1,7 @@
 # Tundra Album
 
 A collaborative puzzle piece tracker for the game Tundra. Players can mark pieces they are looking for or have as duplicates, and see what other players are offering or need.
- 
+
 <table align="center">
   <tr>
     <td align="center" valign="top"><b>Home page</b><br><br><img src="https://github.com/user-attachments/assets/abb38f72-f2af-4804-a18d-a4a48325cbb2" width="300"></td>
@@ -13,18 +13,19 @@ A collaborative puzzle piece tracker for the game Tundra. Players can mark piece
 ## Features
 
 - **Album & puzzle browser** - navigate albums, puzzles, and individual pieces
-- **Inventory tracking** - mark each piece as *Looking for*, *Have*, or *Have duplicate*
+- **Inventory tracking** - mark each piece as _Looking for_, _Have_, or _Have duplicate_
 - **Star ratings** - pieces have a 1–5 star rarity; right-click to edit (admin and stars editor only)
 - **Player matching** - see which players can give you pieces you need, and which pieces they need from you; filter by "Can give you" or "Needs from you", sort by recency, search by puzzle name, and navigate directly to a player's page from a match card
 - **Player profiles** - browse any player's albums and see their inventory read-only, with your own duplicates highlighted
 - **Alliance system** - players belong to alliances; the players list groups by alliance
-- **Roles** - three roles control access: *Admin*, *Stars editor*, and *User*
+- **Roles** - three roles control access: _Admin_, _Stars editor_, and _User_
 - **Album Missions** - track per-album mission milestones (Rare / Epic / Mythic); mark milestones as completed, step back, reset per album, and toggle visibility of completed missions
 - **Activity log** - all inventory, user, and admin actions are logged; admins can browse the paginated log (20 per page) with filters by category and user (all users shown, not just recent); logs older than 7 days are automatically pruned; a 24-hour summary card is visible to all users on the home dashboard
 - **Admin area** - admins can manage users (name, alliance, password, role), albums (create, rename, reorder, delete, manage puzzles and piece counts), and mission milestones (add tasks, add/edit/delete milestones per album)
-- **Progressive Web App** - installable on Android, iOS, and desktop; works offline for cached pages; install via *avatar menu → Install app*
+- **Progressive Web App** - installable on Android, iOS, and desktop; works offline for cached pages; install via _avatar menu → Install app_
 - **Push notifications** - players receive a browser push notification when someone clicks a piece on their player page; every 2 hours, a batch notification is sent for pieces they need that have become available as duplicates
 - **Available for trade** - a dedicated page lists all pieces currently offered as duplicates by other players, grouped by album and puzzle, with direct links to each provider's page; accessible from the avatar menu
+- **Account email & password recovery** - players can optionally add an email address in Settings; a verification email is sent to confirm it; a "Forgot password?" link on the login page lets players request a reset link by email
 
 ## Tech Stack
 
@@ -71,6 +72,7 @@ This creates all albums, puzzles, pieces (with star ratings), and an initial **a
 ## Deployment (Railway)
 
 The app is deployed on Railway with:
+
 - A single service running the Express backend, which also serves the built frontend
 - A persistent volume mounted for the SQLite database
 
@@ -85,29 +87,34 @@ cd frontend && npm run build
 The database is stored on a Railway persistent volume. To download a local copy:
 
 **1. Open an SSH session on Railway**
+
 ```bash
 railway ssh --project=<PROJECT_ID> --environment=<ENVIRONMENT_ID> --service=<SERVICE_ID>
 ```
 
 **2. Checkpoint the WAL and create a clean backup**
+
 ```bash
 node -e "const db = require('/app/backend/node_modules/better-sqlite3')('/data/tundra.db'); db.pragma('wal_checkpoint(FULL)'); db.backup('/data/tundra-clean.db').then(() => console.log('done'))"
 exit
 ```
 
 **3. Export the backup as base64**
+
 ```bash
 railway ssh --project=<PROJECT_ID> --environment=<ENVIRONMENT_ID> --service=<SERVICE_ID> \
   -- base64 /data/tundra-clean.db > data/tundra-backup.b64
 ```
 
 **4. Decode locally**
+
 ```bash
 tr -d '\r' < data/tundra-backup.b64 | base64 -d > data/tundra-backup.db
 sqlite3 data/tundra-backup.db "PRAGMA integrity_check;"
 ```
 
 **5. Use the backup locally**
+
 ```bash
 cp data/tundra.db data/tundra-local.db   # save current local DB
 cp data/tundra-backup.db data/tundra.db
@@ -115,10 +122,15 @@ cp data/tundra-backup.db data/tundra.db
 
 ### Environment variables
 
-| Variable | Description | Default |
-|---|---|---|
-| `PORT` | Server port | `3001` |
-| `DATABASE_PATH` | Path to SQLite database file | `./data/tundra.db` |
-| `JWT_SECRET` | Secret key for JWT tokens | - |
-| `NODE_ENV` | Set to `production` to serve frontend | - |
-| `ALLOWED_ORIGIN` | Allowed CORS origin | `http://localhost:5173` |
+| Variable                         | Description                                 | Default                          |
+| -------------------------------- | ------------------------------------------- | -------------------------------- |
+| `PORT`                           | Server port                                 | `3001`                           |
+| `DATABASE_PATH`                  | Path to SQLite database file                | `./data/tundra.db`               |
+| `JWT_SECRET`                     | Secret key for JWT tokens                   | -                                |
+| `NODE_ENV`                       | Set to `production` to serve frontend       | -                                |
+| `ALLOWED_ORIGIN`                 | Allowed CORS origin                         | `http://localhost:5173`          |
+| `APP_URL`                        | Public URL of the app (used in email links) | `http://localhost:5173`          |
+| `RESEND_API_KEY`                 | Resend API key for sending emails           | -                                |
+| `RESEND_TEMPLATE_VERIFY_EMAIL`   | Resend template ID for email verification   | -                                |
+| `RESEND_TEMPLATE_PASSWORD_RESET` | Resend template ID for password reset       | -                                |
+| `SMTP_FROM`                      | Sender address shown in emails              | `RESEND_API_KEY` account address |
