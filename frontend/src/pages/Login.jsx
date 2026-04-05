@@ -43,10 +43,15 @@ export default function Login() {
           {error && <p className="error">{error}</p>}
           <button type="submit" className="btn-primary">Login</button>
         </form>
-        <p style={{ marginTop: 16, fontSize: 14, color: '#94a3b8', textAlign: 'center' }}>
-          No account yet?{' '}
-          <Link to="/register" style={{ color: '#3b82f6' }}>Register</Link>
-        </p>
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+          <p style={{ fontSize: 14, color: '#94a3b8', margin: 0 }}>
+            No account yet?{' '}
+            <Link to="/register" style={{ color: '#3b82f6' }}>Register</Link>
+          </p>
+          <p style={{ fontSize: 14, color: '#94a3b8', margin: 0 }}>
+            <Link to="/forgot-password" style={{ color: '#64748b' }}>Forgot password?</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

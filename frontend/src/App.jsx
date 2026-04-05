@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { subscribeToPush } from './utils/pushNotifications';
@@ -19,6 +19,9 @@ import Missions from './pages/Missions';
 import Activity from './pages/Activity';
 import ChangePassword from './pages/ChangePassword';
 import Available from './pages/Available';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 function PrivateRoute({ children, skipForceCheck = false }) {
   const { auth } = useAuth();
@@ -53,8 +56,12 @@ export default function App() {
   );
 }
 
+const PUBLIC_ONLY_PATHS = ['/forgot-password', '/reset-password', '/verify-email'];
+
 function AppRoutes() {
   const { auth } = useAuth();
+  const location = useLocation();
+  const isPublicOnlyPath = PUBLIC_ONLY_PATHS.includes(location.pathname);
 
   useEffect(() => {
     if (auth && localStorage.getItem('pushNotificationsEnabled') !== 'false') {
@@ -64,10 +71,13 @@ function AppRoutes() {
 
   return (
     <>
-      {auth && !auth.force_password_change && <Navbar />}
+      {auth && !auth.force_password_change && !isPublicOnlyPath && <Navbar />}
       <Routes>
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/change-password" element={<PrivateRoute skipForceCheck><ChangePassword /></PrivateRoute>} />
         <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
         <Route path="/albums" element={<PrivateRoute><Albums /></PrivateRoute>} />
@@ -83,7 +93,7 @@ function AppRoutes() {
         <Route path="/available" element={<PrivateRoute><Available /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {auth && !auth.force_password_change && <Footer />}
+      {auth && !auth.force_password_change && !isPublicOnlyPath && <Footer />}
     </>
   );
 }

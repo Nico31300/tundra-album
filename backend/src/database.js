@@ -109,6 +109,32 @@ try {
 try {
   db.exec('ALTER TABLE users ADD COLUMN in_game_name TEXT');
 } catch {}
+try {
+  db.exec('ALTER TABLE users ADD COLUMN email TEXT');
+} catch (e) {
+  if (!e.message.includes('duplicate column')) console.error('[db] email migration error:', e.message);
+}
+try {
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL');
+} catch (e) {
+  console.error('[db] email index error:', e.message);
+}
+try {
+  db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
+} catch {}
+try {
+  db.exec('ALTER TABLE users ADD COLUMN email_verification_token TEXT');
+} catch {}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token      TEXT    UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'admin')`).run();
 db.prepare(`INSERT OR IGNORE INTO roles (id, name) VALUES (2, 'stars_editor')`).run();

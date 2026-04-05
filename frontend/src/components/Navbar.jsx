@@ -266,6 +266,16 @@ export default function Navbar() {
             <div style={{ color: '#e2e8f0', fontWeight: 600 }}>What's new</div>
 
             <div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.7.0 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Apr 5, 2026</span></div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
+                <li>Settings redesign - sections, mobile-friendly navigation</li>
+                <li>Email address - add an optional email to your account in Settings</li>
+                <li>Email verification - confirm your address to unlock password recovery</li>
+                <li>Forgot password - reset your password by email from the login page</li>
+              </ul>
+            </div>
+
+            <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.6.3 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Apr 3, 2026</span></div>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
                 <li>Performance - reduced latency when switching back to the app on iOS</li>
@@ -296,16 +306,6 @@ export default function Navbar() {
                 <li>Available for trade page - see all pieces currently offered as duplicates, grouped by album and puzzle, with links to each provider</li>
                 <li>Batch push notifications - get notified every 2 hours about pieces you need that have become available</li>
                 <li>Auth page polish - navbar and footer are now hidden on login, register, and change-password pages</li>
-              </ul>
-            </div>
-
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>v1.5.2 <span style={{ fontWeight: 400, color: '#475569', fontSize: 11 }}>Mar 27, 2026</span></div>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, margin: 0 }}>
-                <li>Security hardening - rate limiting, CORS</li>
-                <li>Error states on all pages - failed requests now show a message</li>
-                <li>Skeleton loaders on all pages</li>
-                <li>Backend performance</li>
               </ul>
             </div>
 
