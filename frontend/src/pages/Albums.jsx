@@ -26,7 +26,12 @@ export default function Albums() {
       {error && <div style={{ color: '#f87171', marginBottom: 16, fontSize: 14 }}>{error}</div>}
       <div className="grid-3" style={{ gridAutoRows: '1fr' }}>
         {albums === null && !error && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-        {albums?.map(album => {
+        {albums?.slice().sort((a, b) => {
+          const aDone = a.stats?.total_puzzles > 0 && a.stats.completed_puzzles === a.stats.total_puzzles;
+          const bDone = b.stats?.total_puzzles > 0 && b.stats.completed_puzzles === b.stats.total_puzzles;
+          if (aDone !== bDone) return aDone ? 1 : -1;
+          return a.id - b.id;
+        }).map(album => {
           const allDone = album.stats?.total_puzzles > 0 && album.stats.completed_puzzles === album.stats.total_puzzles;
           const owned = (album.stats?.have ?? 0) + (album.stats?.have_duplicate ?? 0);
           return (
