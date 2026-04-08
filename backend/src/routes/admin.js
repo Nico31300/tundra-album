@@ -10,7 +10,7 @@ router.use(authMiddleware, requireRole('admin'));
 // GET /api/admin/users
 router.get('/users', (req, res) => {
   const users = db.prepare(`
-    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance, u.created_at, r.name as role
+    SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance, u.created_at, r.name as role, u.email, u.email_verified
     FROM users u JOIN roles r ON r.id = u.role_id
     ORDER BY u.id
   `).all();
@@ -44,7 +44,7 @@ router.put('/users/:id', (req, res) => {
     `).run(username || null, in_game_name || null, alliance !== undefined ? (alliance || null) : user.alliance, roleRow?.id ?? null, id);
 
     const updated = db.prepare(`
-      SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance, u.created_at, r.name as role
+      SELECT u.id, u.username, COALESCE(u.in_game_name, u.username) AS in_game_name, u.alliance, u.created_at, r.name as role, u.email, u.email_verified
       FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?
     `).get(id);
 

@@ -173,6 +173,7 @@ function UsersTab() {
               <th style={{ padding: '8px 12px' }}>In game name</th>
               <th style={{ padding: '8px 12px' }}>Alliance</th>
               <th style={{ padding: '8px 12px' }}>Role</th>
+              <th style={{ padding: '8px 12px' }}>Email</th>
               <th style={{ padding: '8px 12px' }}>Joined</th>
               <th style={{ padding: '8px 12px' }} />
             </tr>
@@ -180,7 +181,7 @@ function UsersTab() {
           <tbody>
             {users === null && Array.from({ length: 4 }).map((_, i) => (
               <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}>
-                {[60, 50, 50, 40, 50, 80].map((w, j) => (
+                {[60, 50, 50, 40, 120, 50, 80].map((w, j) => (
                   <td key={j} style={{ padding: '10px 12px' }}>
                     <div className="skeleton" style={{ height: 12, width: `${w}%` }} />
                   </td>
@@ -200,6 +201,20 @@ function UsersTab() {
                   }}>
                     {user.role}
                   </span>
+                </td>
+                <td style={{ padding: '10px 12px', fontSize: 12 }}>
+                  {user.email ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: '#94a3b8' }}>{user.email}</span>
+                      <span style={{
+                        fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99,
+                        background: user.email_verified ? '#14532d' : '#431407',
+                        color: user.email_verified ? '#86efac' : '#fdba74',
+                      }}>
+                        {user.email_verified ? 'verified' : 'unverified'}
+                      </span>
+                    </div>
+                  ) : <span style={{ color: '#334155' }}>—</span>}
                 </td>
                 <td style={{ padding: '10px 12px', color: '#475569', fontSize: 12 }}>
                   {new Date(user.created_at).toLocaleDateString()}
