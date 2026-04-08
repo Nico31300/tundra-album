@@ -15,7 +15,9 @@ router.get('/', authMiddleware, (req, res) => {
            COUNT(p.id) AS total,
            SUM(CASE WHEN i.status = 'need' THEN 1 ELSE 0 END) AS need,
            SUM(CASE WHEN i.status = 'have_duplicate' THEN 1 ELSE 0 END) AS have_duplicate,
-           SUM(CASE WHEN i.status = 'have' THEN 1 ELSE 0 END) AS have
+           SUM(CASE WHEN i.status = 'have' THEN 1 ELSE 0 END) AS have,
+           SUM(CASE WHEN p.stars = 5 THEN 1 ELSE 0 END) AS five_star_total,
+           SUM(CASE WHEN p.stars = 5 AND i.status IN ('have', 'have_duplicate') THEN 1 ELSE 0 END) AS five_star_owned
     FROM puzzles pz
     JOIN pieces p ON p.puzzle_id = pz.id
     LEFT JOIN inventory i ON i.piece_id = p.id AND i.user_id = ?

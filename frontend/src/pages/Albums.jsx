@@ -74,6 +74,20 @@ export default function Albums() {
                         </span>
                       </div>
                     )}
+                    {!allDone && album.stats.five_star_total > 0 && (
+                      <div style={{ marginTop: 4, position: 'relative', background: '#0f172a', borderRadius: 99, height: 18, overflow: 'hidden' }}>
+                        <div style={{
+                          width: `${(album.stats.five_star_owned / album.stats.five_star_total) * 100}%`,
+                          height: '100%', background: '#f59e0b', borderRadius: 99,
+                        }} />
+                        <span style={{
+                          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 11, fontWeight: 700, color: '#fff',
+                        }}>
+                          {album.stats.five_star_owned}/{album.stats.five_star_total} (5★)
+                        </span>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
