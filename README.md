@@ -69,6 +69,62 @@ cd backend && npm run seed
 
 This creates all albums, puzzles, pieces (with star ratings), and an initial **admin** user (`admin` / `admin`). You will be prompted to set a new password on first login.
 
+## Deployment (Docker)
+
+The easiest way to self-host Tundra Album is with Docker. The database is stored in a named volume so it persists across container restarts and upgrades.
+
+### Prerequisites
+
+- Docker and Docker Compose
+
+### Setup
+
+**1. Copy the example environment file and edit it**
+
+```bash
+cp .env.example .env
+```
+
+At minimum, set a strong `JWT_SECRET` and update `ALLOWED_ORIGIN` / `APP_URL` to match your server's URL.
+
+**2. Build and start the container**
+
+```bash
+docker compose up -d --build
+```
+
+**3. Seed the database (first launch only)**
+
+```bash
+docker compose exec app node backend/src/seed.js
+```
+
+This creates all albums, puzzles, pieces (with star ratings), and an initial **admin** user (`admin` / `admin`). You will be prompted to set a new password on first login.
+
+The app is now available at `http://localhost:3001` (or the port you configured).
+
+### Upgrading
+
+```bash
+docker compose pull   # if using a pre-built image
+docker compose up -d --build
+```
+
+The database volume (`tundra_data`) is preserved automatically.
+
+### Database backup
+
+```bash
+docker compose exec app node -e "
+  const db = require('/app/backend/node_modules/better-sqlite3')('/data/tundra.db');
+  db.pragma('wal_checkpoint(FULL)');
+  db.backup('/data/tundra-backup.db').then(() => console.log('done'));
+"
+docker cp $(docker compose ps -q app):/data/tundra-backup.db ./tundra-backup.db
+```
+
+---
+
 ## Deployment (Railway)
 
 The app is deployed on Railway with:
